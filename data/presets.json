@@ -67,6 +67,23 @@
       "created_at": "2025-08-12T11:43:57.056432",
       "updated_at": "2025-08-12T11:43:57.056432",
       "usage_count": 0
+    },
+    {
+      "id": "9dbe0e77-4d72-4430-8dab-98309b1af820",
+      "name": "123213",
+      "description": "wqewqrqer",
+      "template_id": "default",
+      "voice_config": {
+        "provider": "gtts",
+        "voice": "zh",
+        "speed": 1,
+        "enabled": true
+      },
+      "style": "educational",
+      "duration": "30s",
+      "created_at": "2025-08-12T13:07:11.071259",
+      "updated_at": "2025-08-12T13:07:11.071259",
+      "usage_count": 0
     }
   ]
 }

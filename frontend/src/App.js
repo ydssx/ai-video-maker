@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { Layout, Steps, Card, Button, message, Alert } from 'antd';
-import { 
-  FileTextOutlined, 
-  SettingOutlined, 
+import { Layout, Steps, Card, Button, message, Alert, Drawer } from 'antd';
+import {
+  FileTextOutlined,
+  SettingOutlined,
   PlayCircleOutlined,
-  DownloadOutlined 
+  DownloadOutlined,
+  UserOutlined
 } from '@ant-design/icons';
 import ScriptGenerator from './components/ScriptGenerator';
 import VideoPreview from './components/VideoPreview';
 import StandaloneAssetManager from './components/StandaloneAssetManager';
+import UserDashboard from './components/UserDashboard';
 import './App.css';
 
 const { Header, Content, Footer } = Layout;
@@ -18,6 +20,7 @@ function App() {
   const [currentStep, setCurrentStep] = useState(0);
   const [script, setScript] = useState(null);
   const [videoId, setVideoId] = useState(null);
+  const [showUserDashboard, setShowUserDashboard] = useState(false);
 
   const steps = [
     {
@@ -81,7 +84,7 @@ function App() {
       }
       return;
     }
-    
+
     // 只允许访问当前步骤或之前完成的步骤
     if (step <= currentStep || isStepAccessible(step)) {
       setCurrentStep(step);
@@ -96,8 +99,16 @@ function App() {
             🎬 AI 短视频制作平台
           </h1>
           <div className="header-actions">
-            <Button 
-              type="link" 
+            <Button
+              type="link"
+              style={{ color: 'white' }}
+              icon={<UserOutlined />}
+              onClick={() => setShowUserDashboard(true)}
+            >
+              用户中心
+            </Button>
+            <Button
+              type="link"
               style={{ color: 'white' }}
               onClick={() => setCurrentStep(currentStep === 4 ? 0 : 4)}
             >
@@ -120,14 +131,14 @@ function App() {
                 {script && <span style={{ marginLeft: 16, color: '#52c41a' }}>✓ 脚本已生成</span>}
                 {videoId && <span style={{ marginLeft: 16, color: '#52c41a' }}>✓ 视频已制作</span>}
               </div>
-              <Steps 
-                current={currentStep} 
+              <Steps
+                current={currentStep}
                 onChange={handleStepChange}
                 type="navigation"
               >
                 {steps.map((step, index) => {
                   const isAccessible = isStepAccessible(index);
-                  
+
                   // 判断步骤状态
                   let status = 'wait';
                   if (isAccessible && index < currentStep) {
@@ -137,7 +148,7 @@ function App() {
                   } else if (!isAccessible) {
                     status = 'wait';
                   }
-                  
+
                   return (
                     <Step
                       key={index}
@@ -160,7 +171,7 @@ function App() {
                 <ScriptGenerator onScriptGenerated={handleScriptGenerated} />
               </div>
             )}
-            
+
             {currentStep >= 1 && currentStep <= 3 && (
               <div>
                 {currentStep === 1 && (
@@ -172,7 +183,7 @@ function App() {
                     style={{ marginBottom: 16 }}
                   />
                 )}
-                <VideoPreview 
+                <VideoPreview
                   script={script}
                   onVideoCreated={handleVideoCreated}
                 />
@@ -191,6 +202,18 @@ function App() {
           AI 短视频制作平台 ©2024 - 让创作更简单
         </div>
       </Footer>
+
+      {/* 用户中心抽屉 */}
+      <Drawer
+        title="👤 用户中心"
+        placement="right"
+        width={480}
+        onClose={() => setShowUserDashboard(false)}
+        open={showUserDashboard}
+        bodyStyle={{ padding: '16px' }}
+      >
+        <UserDashboard />
+      </Drawer>
     </Layout>
   );
 }

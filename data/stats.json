@@ -1,17 +1,17 @@
 {
   "user_stats": {
     "anonymous_user": {
-      "scripts_generated": 5,
-      "videos_created": 4,
-      "total_duration": 90.0,
-      "last_activity": "2025-08-12T11:44:31.620463"
+      "scripts_generated": 10,
+      "videos_created": 5,
+      "total_duration": 112.5,
+      "last_activity": "2025-08-12T12:35:36.177907"
     }
   },
   "system_stats": {
     "total_users": 0,
-    "total_scripts": 5,
-    "total_videos": 4,
-    "total_duration": 90.0,
+    "total_scripts": 10,
+    "total_videos": 5,
+    "total_duration": 112.5,
     "active_users_today": 0
   }
 }

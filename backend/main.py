@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 import os
 from dotenv import load_dotenv
 
-from routers import script_generator, video_maker, assets, stats, presets
+from routers import script_generator, video_maker, assets, stats, presets, user_assets, audio_manager, projects, cloud_storage
 
 load_dotenv()
 
@@ -38,6 +38,10 @@ app.include_router(video_maker.router, prefix="/api/video", tags=["video"])
 app.include_router(assets.router, prefix="/api/assets", tags=["assets"])
 app.include_router(stats.router, prefix="/api/stats", tags=["stats"])
 app.include_router(presets.router, prefix="/api/presets", tags=["presets"])
+app.include_router(user_assets.router)
+app.include_router(audio_manager.router)
+app.include_router(projects.router)
+app.include_router(cloud_storage.router)
 
 @app.get("/")
 async def root():
