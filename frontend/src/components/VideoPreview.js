@@ -1,11 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Card, Alert, Row, Col, message } from 'antd';
-import { PlayCircleOutlined } from '@ant-design/icons';
+import { Button, Card, Alert, Row, Col, message, Tabs } from 'antd';
+import {
+  PlayCircleOutlined,
+  SettingOutlined,
+  EditOutlined,
+  SoundOutlined,
+  SwapOutlined,
+  DownloadOutlined,
+  FolderOutlined
+} from '@ant-design/icons';
 import axios from 'axios';
 import TemplateSelector from './TemplateSelector';
 import VoiceSelector from './VoiceSelector';
 import PresetManager from './PresetManager';
+import VideoTimeline from './VideoTimeline';
+import TextStyleEditor from './TextStyleEditor';
+import AssetManager from './AssetManager';
+import AudioManager from './AudioManager';
+import TransitionEditor from './TransitionEditor';
+import ExportSettings from './ExportSettings';
+import ProjectManager from './ProjectManager';
+import VideoDownload from './VideoDownload';
 import { VideoGeneratingLoader } from './LoadingStates';
+
+const { TabPane } = Tabs;
 
 function VideoPreview({ script, onVideoCreated }) {
   const [loading, setLoading] = useState(false);
@@ -20,6 +38,18 @@ function VideoPreview({ script, onVideoCreated }) {
     speed: 1.0,
     enabled: true
   });
+  const [currentScene, setCurrentScene] = useState(0);
+  const [textStyle, setTextStyle] = useState({
+    fontFamily: 'Arial',
+    fontSize: 48,
+    fontColor: '#ffffff',
+    position: 'center'
+  });
+  const [audioConfig, setAudioConfig] = useState(null);
+  const [transitionConfig, setTransitionConfig] = useState([]);
+  const [exportConfig, setExportConfig] = useState(null);
+  const [currentProject, setCurrentProject] = useState(null);
+  const [activeTab, setActiveTab] = useState('assets');
 
   useEffect(() => {
     let interval;
@@ -47,7 +77,7 @@ function VideoPreview({ script, onVideoCreated }) {
     try {
       const response = await axios.get(`/api/video/status/${videoId}`);
       setVideoStatus(response.data.status);
-      
+
       if (response.data.status === 'completed') {
         setProgress(100);
         onVideoCreated(videoId);
@@ -74,21 +104,116 @@ function VideoPreview({ script, onVideoCreated }) {
     message.success(`已应用预设：${preset.name}`);
   };
 
+  const handleSceneChange = (sceneIndex) => {
+    setCurrentScene(sceneIndex);
+  };
+
+  const handleTextStyleChange = (newStyle) => {
+    setTextStyle(newStyle);
+  };
+
+  const handleAssetSelect = (asset) => {
+    // 处理素材选择
+    message.success(`已选择素材：${asset.name}`);
+  };
+
+  const handleAudioConfigChange = (config) => {
+    setAudioConfig(config);
+  };
+
+  const handleTransitionChange = (transitions) => {
+    setTransitionConfig(transitions);
+  };
+
+  const handleExportConfigChange = (config) => {
+    setExportConfig(config);
+  };
+
+  const handleStartExport = (config) => {
+    // 处理导出逻辑
+    console.log('开始导出，配置:', config);
+    message.info('开始导出视频...');
+  };
+
+  const handleProjectLoad = (project) => {
+    setCurrentProject(project);
+    // 这里可以加载项目的脚本和配置
+    message.success(`已加载项目：${project.name}`);
+  };
+
+  const handleProjectSave = (project) => {
+    setCurrentProject(project);
+    message.success(`项目已保存：${project.name}`);
+  };
+
+  const handleDownloadVideo = async () => {
+    try {
+      // 创建下载链接
+      const downloadUrl = `/api/video/download/${videoId}`;
+      
+      // 创建临时链接并触发下载
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `ai_video_${videoId}.mp4`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      message.success('开始下载视频');
+    } catch (error) {
+      console.error('下载失败:', error);
+      message.error('下载失败，请重试');
+    }
+  };
+
+  const handleShareVideo = async () => {
+    try {
+      const shareUrl = `${window.location.origin}/output/${videoId}.mp4`;
+      
+      // 尝试使用 Web Share API
+      if (navigator.share) {
+        await navigator.share({
+          title: 'AI 生成的视频',
+          text: '查看我用 AI 制作的视频',
+          url: shareUrl
+        });
+      } else {
+        // 降级到复制链接
+        await navigator.clipboard.writeText(shareUrl);
+        message.success('视频链接已复制到剪贴板');
+      }
+    } catch (error) {
+      console.error('分享失败:', error);
+      // 手动复制链接作为备用方案
+      const shareUrl = `${window.location.origin}/output/${videoId}.mp4`;
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        message.success('视频链接已复制到剪贴板');
+      } catch (clipboardError) {
+        message.info(`视频链接: ${shareUrl}`);
+      }
+    }
+  };
+
   const handleCreateVideo = async () => {
     setLoading(true);
     setProgress(10);
-    
+
     try {
       const response = await axios.post('/api/video/create', {
         script: script,
         template_id: selectedTemplate,
-        voice_config: voiceConfig
+        voice_config: voiceConfig,
+        text_style: textStyle,
+        audio_config: audioConfig,
+        transition_config: transitionConfig,
+        export_config: exportConfig
       });
-      
+
       setVideoId(response.data.video_id);
       setVideoStatus('processing');
       setProgress(20);
-      
+
       // 记录统计
       try {
         await axios.post('/api/stats/record-video', null, {
@@ -105,52 +230,183 @@ function VideoPreview({ script, onVideoCreated }) {
     }
   };
 
-  if (!script) {
-    return (
-      <Alert
-        message="请先生成脚本"
-        description="您需要先在上一步生成视频脚本，然后才能创建视频。"
-        type="info"
-        showIcon
-      />
-    );
-  }
+  // 如果没有脚本，只显示素材管理和项目管理功能
+  const hasScript = !!script;
 
   return (
     <div className="video-preview">
-      <Row gutter={[24, 24]}>
-        <Col span={24}>
-          <Card title="快速预设">
-            <PresetManager 
-              currentConfig={{
-                template_id: selectedTemplate,
-                voice_config: voiceConfig
-              }}
-              onApplyPreset={handleApplyPreset}
-            />
-          </Card>
-        </Col>
-      </Row>
+      {!hasScript && (
+        <Alert
+          message="提示"
+          description="您可以先管理素材和项目，或者生成脚本后进行完整的视频制作。"
+          type="info"
+          showIcon
+          style={{ marginBottom: 24 }}
+        />
+      )}
 
-      <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
+      {hasScript && (
+        <Row gutter={[24, 24]}>
+          <Col span={24}>
+            <Card title="快速预设">
+              <PresetManager
+                currentConfig={{
+                  template_id: selectedTemplate,
+                  voice_config: voiceConfig
+                }}
+                onApplyPreset={handleApplyPreset}
+              />
+            </Card>
+          </Col>
+        </Row>
+      )}
+
+      <Row gutter={[24, 24]} style={{ marginTop: hasScript ? 24 : 0 }}>
         <Col span={24}>
-          <Card title="视频模板选择">
-            <TemplateSelector 
-              selectedTemplate={selectedTemplate}
-              onTemplateChange={setSelectedTemplate}
-            />
+          <Card>
+            <Tabs activeKey={activeTab} onChange={setActiveTab}>
+              {/* 始终可用的标签页 */}
+              <TabPane
+                tab="素材库"
+                key="assets"
+              >
+                <AssetManager
+                  onAssetSelect={handleAssetSelect}
+                />
+              </TabPane>
+
+              <TabPane
+                tab={
+                  <span>
+                    <SoundOutlined />
+                    音频管理
+                  </span>
+                }
+                key="audio"
+              >
+                <AudioManager
+                  onAudioConfigChange={handleAudioConfigChange}
+                />
+              </TabPane>
+
+              <TabPane
+                tab={
+                  <span>
+                    <FolderOutlined />
+                    项目管理
+                  </span>
+                }
+                key="projects"
+              >
+                <ProjectManager
+                  currentProject={currentProject}
+                  onProjectLoad={handleProjectLoad}
+                  onProjectSave={handleProjectSave}
+                  script={script}
+                  videoConfig={{
+                    template_id: selectedTemplate,
+                    voice_config: voiceConfig,
+                    text_style: textStyle,
+                    audio_config: audioConfig,
+                    transition_config: transitionConfig,
+                    export_config: exportConfig
+                  }}
+                />
+              </TabPane>
+
+              <TabPane
+                tab={
+                  <span>
+                    <DownloadOutlined />
+                    导出设置
+                  </span>
+                }
+                key="export"
+              >
+                <ExportSettings
+                  onExportConfigChange={handleExportConfigChange}
+                  onStartExport={handleStartExport}
+                />
+              </TabPane>
+
+              {/* 需要脚本的标签页 */}
+              {hasScript && (
+                <>
+                  <TabPane
+                    tab={
+                      <span>
+                        <SettingOutlined />
+                        模板设置
+                      </span>
+                    }
+                    key="template"
+                  >
+                    <TemplateSelector
+                      selectedTemplate={selectedTemplate}
+                      onTemplateChange={setSelectedTemplate}
+                    />
+                  </TabPane>
+
+                  <TabPane
+                    tab={
+                      <span>
+                        <EditOutlined />
+                        文字样式
+                      </span>
+                    }
+                    key="text"
+                  >
+                    <TextStyleEditor
+                      textStyle={textStyle}
+                      onStyleChange={handleTextStyleChange}
+                    />
+                  </TabPane>
+
+                  <TabPane
+                    tab={
+                      <span>
+                        <PlayCircleOutlined />
+                        时间轴
+                      </span>
+                    }
+                    key="timeline"
+                  >
+                    <VideoTimeline
+                      script={script}
+                      currentScene={currentScene}
+                      onSceneChange={handleSceneChange}
+                    />
+                  </TabPane>
+
+                  <TabPane
+                    tab={
+                      <span>
+                        <SwapOutlined />
+                        转场效果
+                      </span>
+                    }
+                    key="transitions"
+                  >
+                    <TransitionEditor
+                      script={script}
+                      onTransitionChange={handleTransitionChange}
+                    />
+                  </TabPane>
+                </>
+              )}
+            </Tabs>
           </Card>
         </Col>
       </Row>
 
       <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
         <Col span={12}>
-          <VoiceSelector 
+          <VoiceSelector
             voiceConfig={voiceConfig}
             onVoiceConfigChange={setVoiceConfig}
           />
         </Col>
-        
+
         <Col span={12}>
           <Card title="制作设置" size="small">
             <p><strong>分辨率：</strong>1280x720</p>
@@ -158,17 +414,7 @@ function VideoPreview({ script, onVideoCreated }) {
             <p><strong>格式：</strong>MP4</p>
             <p><strong>选中模板：</strong>{templates.find(t => t.id === selectedTemplate)?.name || '默认模板'}</p>
             <p><strong>语音：</strong>{voiceConfig.enabled ? '已启用' : '已关闭'}</p>
-          </Card>
-        </Col>
-      </Row>
-
-      <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
-        <Col span={24}>
-          <Card title="脚本信息" size="small">
-            <p><strong>标题：</strong>{script.title}</p>
-            <p><strong>总时长：</strong>{script.total_duration}秒</p>
-            <p><strong>场景数：</strong>{script.scenes.length}</p>
-            <p><strong>风格：</strong>{script.style}</p>
+            <p><strong>当前场景：</strong>{currentScene + 1} / {script.scenes.length}</p>
           </Card>
         </Col>
       </Row>
@@ -189,7 +435,7 @@ function VideoPreview({ script, onVideoCreated }) {
 
       {videoId && videoStatus !== 'completed' && (
         <div style={{ marginTop: 20 }}>
-          <VideoGeneratingLoader 
+          <VideoGeneratingLoader
             progress={progress}
             currentStep={getVideoStep(progress)}
           />
@@ -197,36 +443,47 @@ function VideoPreview({ script, onVideoCreated }) {
       )}
 
       {videoStatus === 'completed' && (
-        <Card style={{ marginTop: 20 }}>
-          <div style={{ textAlign: 'center' }}>
-            <Alert
-              message="视频制作完成！"
-              description="您的视频已经制作完成，可以预览和下载了。"
-              type="success"
-              showIcon
-              style={{ marginBottom: 20 }}
-            />
-            
-            <video 
-              className="video-player"
-              controls 
-              width="600"
-              src={`/output/${videoId}.mp4`}
-              onError={(e) => {
-                console.error('视频加载失败:', e);
-                message.error('视频预览加载失败，但您仍可以尝试下载');
-              }}
-              onLoadStart={() => {
-                console.log('开始加载视频');
-              }}
-              onCanPlay={() => {
-                console.log('视频可以播放');
-              }}
-            >
-              您的浏览器不支持视频播放。
-            </video>
-          </div>
-        </Card>
+        <div>
+          <Card style={{ marginTop: 20 }}>
+            <div style={{ textAlign: 'center' }}>
+              <Alert
+                message="视频制作完成！"
+                description="您的视频已经制作完成，可以预览和下载了。"
+                type="success"
+                showIcon
+                style={{ marginBottom: 20 }}
+              />
+
+              <video
+                className="video-player"
+                controls
+                width="600"
+                src={`/output/${videoId}.mp4`}
+                onError={(e) => {
+                  console.error('视频加载失败:', e);
+                  message.error('视频预览加载失败，但您仍可以尝试下载');
+                }}
+                onLoadStart={() => {
+                  console.log('开始加载视频');
+                }}
+                onCanPlay={() => {
+                  console.log('视频可以播放');
+                }}
+              >
+                您的浏览器不支持视频播放。
+              </video>
+            </div>
+          </Card>
+          
+          <VideoDownload 
+            videoId={videoId}
+            onNewVideo={() => {
+              setVideoId(null);
+              setVideoStatus(null);
+              setProgress(0);
+            }}
+          />
+        </div>
       )}
 
       {videoStatus === 'failed' && (
