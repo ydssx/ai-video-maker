@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Button, Tag, Divider } from 'antd';
+import { Card, Row, Col, Tag, Tabs } from 'antd';
 import { CheckOutlined } from '@ant-design/icons';
 import axios from 'axios';
+
+const { TabPane } = Tabs;
 
 function TemplateSelector({ selectedTemplate, onTemplateChange }) {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState('全部');
 
   useEffect(() => {
     fetchTemplates();
@@ -26,17 +29,90 @@ function TemplateSelector({ selectedTemplate, onTemplateChange }) {
     const colors = {
       '通用': 'blue',
       '商务': 'green',
-      '科技': 'cyan',
-      '生活': 'orange'
+      '生活': 'orange',
+      '教育': 'purple'
     };
     return colors[category] || 'default';
   };
 
+  const getFilteredTemplates = (category) => {
+    if (category === '全部') return templates;
+    return templates.filter(template => template.category === category);
+  };
+
+  const getCategories = () => {
+    const categories = ['全部', ...new Set(templates.map(t => t.category))];
+    return categories;
+  };
+
+  const getTemplatePreview = (template) => {
+    // 根据模板类型生成预览背景
+    const previewMap = {
+      // 基础模板
+      'default': 'linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)',
+      'modern': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      'tech': 'linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%)',
+      'elegant': 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+      
+      // 商务模板
+      'corporate': 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
+      'startup': 'linear-gradient(135deg, #ef4444 0%, #f97316 100%)',
+      'finance': 'linear-gradient(135deg, #1f2937 0%, #ffd700 100%)',
+      'ecommerce': 'linear-gradient(135deg, #ec4899 0%, #f472b6 100%)',
+      
+      // 生活方式模板
+      'food': 'linear-gradient(135deg, #dc2626 0%, #ea580c 100%)',
+      'travel': 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)',
+      'fitness': 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+      'beauty': 'linear-gradient(135deg, #db2777 0%, #e879f9 100%)',
+      
+      // 教育模板
+      'academic': 'linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%)',
+      'kids': 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+      'language': 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+      'skill': 'linear-gradient(135deg, #ea580c 0%, #dc2626 100%)'
+    };
+    
+    return previewMap[template.id] || previewMap['default'];
+  };
+
+  const getTextColor = (template) => {
+    // 根据模板类型设置文字颜色
+    const colorMap = {
+      'modern': '#2D2D2D',
+      'tech': '#00FFFF',
+      'elegant': '#8B4513',
+      'finance': '#FFD700',
+      'kids': '#FFFFFF'
+    };
+    
+    return colorMap[template.id] || '#FFFFFF';
+  };
+
+  if (loading) {
+    return <div>加载模板中...</div>;
+  }
+
   return (
     <div>
       <h4>选择视频模板</h4>
+      
+      <Tabs 
+        activeKey={selectedCategory} 
+        onChange={setSelectedCategory}
+        size="small"
+        style={{ marginBottom: 16 }}
+      >
+        {getCategories().map(category => (
+          <TabPane 
+            tab={`${category} (${getFilteredTemplates(category).length})`} 
+            key={category}
+          />
+        ))}
+      </Tabs>
+
       <Row gutter={[16, 16]}>
-        {templates.map(template => (
+        {getFilteredTemplates(selectedCategory).map(template => (
           <Col span={12} key={template.id}>
             <Card
               hoverable
@@ -70,34 +146,8 @@ function TemplateSelector({ selectedTemplate, onTemplateChange }) {
           </Col>
         ))}
       </Row>
-
     </div>
   );
-}
-
-function getTemplatePreview(template) {
-  // 根据模板设置生成预览背景
-  if (template.id === 'modern') {
-    return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-  } else if (template.id === 'tech') {
-    return 'linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%)';
-  } else if (template.id === 'elegant') {
-    return 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)';
-  }
-  
-  return 'linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)';
-}
-
-function getTextColor(template) {
-  if (template.id === 'modern') {
-    return '#2D2D2D';
-  } else if (template.id === 'tech') {
-    return '#00FFFF';
-  } else if (template.id === 'elegant') {
-    return '#8B4513';
-  }
-  
-  return '#FFFFFF';
 }
 
 export default TemplateSelector;

@@ -206,3 +206,38 @@ async def health_check():
         "timestamp": datetime.now().isoformat(),
         "version": "1.0.0"
     }
+
+@router.get("/debug/files")
+async def debug_files():
+    """调试文件系统"""
+    import os
+    
+    output_dir = os.path.abspath("../output")
+    assets_dir = os.path.abspath("../assets")
+    
+    result = {
+        "output_dir": {
+            "path": output_dir,
+            "exists": os.path.exists(output_dir),
+            "files": []
+        },
+        "assets_dir": {
+            "path": assets_dir,
+            "exists": os.path.exists(assets_dir),
+            "files": []
+        }
+    }
+    
+    if os.path.exists(output_dir):
+        try:
+            result["output_dir"]["files"] = os.listdir(output_dir)
+        except Exception as e:
+            result["output_dir"]["error"] = str(e)
+    
+    if os.path.exists(assets_dir):
+        try:
+            result["assets_dir"]["files"] = os.listdir(assets_dir)[:10]  # 限制数量
+        except Exception as e:
+            result["assets_dir"]["error"] = str(e)
+    
+    return result

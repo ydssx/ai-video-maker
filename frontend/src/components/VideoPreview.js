@@ -4,6 +4,7 @@ import { PlayCircleOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import TemplateSelector from './TemplateSelector';
 import VoiceSelector from './VoiceSelector';
+import PresetManager from './PresetManager';
 import { VideoGeneratingLoader } from './LoadingStates';
 
 function VideoPreview({ script, onVideoCreated }) {
@@ -66,6 +67,13 @@ function VideoPreview({ script, onVideoCreated }) {
     return 'export';
   };
 
+  const handleApplyPreset = (preset) => {
+    // 应用预设配置
+    setSelectedTemplate(preset.template_id);
+    setVoiceConfig(preset.voice_config);
+    message.success(`已应用预设：${preset.name}`);
+  };
+
   const handleCreateVideo = async () => {
     setLoading(true);
     setProgress(10);
@@ -111,6 +119,20 @@ function VideoPreview({ script, onVideoCreated }) {
   return (
     <div className="video-preview">
       <Row gutter={[24, 24]}>
+        <Col span={24}>
+          <Card title="快速预设">
+            <PresetManager 
+              currentConfig={{
+                template_id: selectedTemplate,
+                voice_config: voiceConfig
+              }}
+              onApplyPreset={handleApplyPreset}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
         <Col span={24}>
           <Card title="视频模板选择">
             <TemplateSelector 

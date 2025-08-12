@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 import os
 from dotenv import load_dotenv
 
-from routers import script_generator, video_maker, assets, stats
+from routers import script_generator, video_maker, assets, stats, presets
 
 load_dotenv()
 
@@ -23,11 +23,21 @@ app.add_middleware(
 app.mount("/assets", StaticFiles(directory="../assets"), name="assets")
 app.mount("/output", StaticFiles(directory="../output"), name="output")
 
+# 测试页面（仅开发环境）
+import os
+if os.getenv("ENVIRONMENT") != "production":
+    from fastapi.responses import FileResponse
+    
+    @app.get("/test-download")
+    async def test_download_page():
+        return FileResponse("../test-download.html")
+
 # 路由
 app.include_router(script_generator.router, prefix="/api/script", tags=["script"])
 app.include_router(video_maker.router, prefix="/api/video", tags=["video"])
 app.include_router(assets.router, prefix="/api/assets", tags=["assets"])
 app.include_router(stats.router, prefix="/api/stats", tags=["stats"])
+app.include_router(presets.router, prefix="/api/presets", tags=["presets"])
 
 @app.get("/")
 async def root():

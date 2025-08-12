@@ -1,0 +1,72 @@
+{
+  "presets": [
+    {
+      "id": "1b11595b-1b8f-4465-9453-7517d58ab670",
+      "name": "商务演示",
+      "description": "适合商务演示和企业宣传的专业风格",
+      "template_id": "corporate",
+      "voice_config": {
+        "provider": "gtts",
+        "voice": "zh",
+        "speed": 1.0,
+        "enabled": true
+      },
+      "style": "commercial",
+      "duration": "30s",
+      "created_at": "2025-08-12T11:43:57.029259",
+      "updated_at": "2025-08-12T11:44:13.642999",
+      "usage_count": 1
+    },
+    {
+      "id": "9ee1f1b5-f62d-4a0e-9e97-2d708d6ac44e",
+      "name": "教育科普",
+      "description": "适合知识分享和教学内容的清晰风格",
+      "template_id": "academic",
+      "voice_config": {
+        "provider": "gtts",
+        "voice": "zh",
+        "speed": 0.9,
+        "enabled": true
+      },
+      "style": "educational",
+      "duration": "60s",
+      "created_at": "2025-08-12T11:43:57.040660",
+      "updated_at": "2025-08-12T11:43:57.040660",
+      "usage_count": 0
+    },
+    {
+      "id": "cdcadaf2-8ec8-4b31-a311-cd9d5b1735fb",
+      "name": "生活分享",
+      "description": "适合生活方式和个人分享的温馨风格",
+      "template_id": "elegant",
+      "voice_config": {
+        "provider": "gtts",
+        "voice": "zh",
+        "speed": 1.1,
+        "enabled": true
+      },
+      "style": "entertainment",
+      "duration": "30s",
+      "created_at": "2025-08-12T11:43:57.049140",
+      "updated_at": "2025-08-12T11:43:57.049140",
+      "usage_count": 0
+    },
+    {
+      "id": "dec66b28-ce35-49c3-bffb-e8b90a0b1f35",
+      "name": "科技创新",
+      "description": "适合科技产品和创新内容的现代风格",
+      "template_id": "tech",
+      "voice_config": {
+        "provider": "gtts",
+        "voice": "zh",
+        "speed": 1.0,
+        "enabled": true
+      },
+      "style": "commercial",
+      "duration": "30s",
+      "created_at": "2025-08-12T11:43:57.056432",
+      "updated_at": "2025-08-12T11:43:57.056432",
+      "usage_count": 0
+    }
+  ]
+}

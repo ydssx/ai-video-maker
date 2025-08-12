@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频下载测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>视频下载功能测试</h1>
+    
+    <div class="test-section">
+        <h2>现有视频测试</h2>
+        <p>测试现有的视频文件下载：</p>
+        <button onclick="testExistingVideo('18422c19-79d0-4ca8-b087-4c72968c0d9a')">
+            测试视频 1
+        </button>
+        <button onclick="testExistingVideo('660e8800-42de-483e-a362-c70eac8c084c')">
+            测试视频 2
+        </button>
+        <button onclick="testExistingVideo('bfa62895-1672-4c5c-9f35-bdb7cc95da42')">
+            测试视频 3
+        </button>
+        <div id="existing-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>创建新测试视频</h2>
+        <button onclick="createTestVideo()">创建测试视频</button>
+        <div id="create-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>下载方法测试</h2>
+        <input type="text" id="videoId" placeholder="输入视频ID" style="width: 300px; padding: 8px;">
+        <br><br>
+        <button onclick="downloadMethod1()">方法1: 直接链接</button>
+        <button onclick="downloadMethod2()">方法2: Fetch + Blob</button>
+        <button onclick="downloadMethod3()">方法3: 新窗口打开</button>
+        <div id="download-result" class="result"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            console.log(message);
+            const resultDiv = document.getElementById('download-result');
+            resultDiv.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+
+        async function testExistingVideo(videoId) {
+            try {
+                // 测试状态API
+                const statusResponse = await fetch(`/api/video/status/${videoId}`);
+                const statusData = await statusResponse.json();
+                
+                document.getElementById('existing-result').innerHTML = `
+                    <div class="success">
+                        视频状态: ${statusData.status}<br>
+                        下载链接: ${statusData.download_url}<br>
+                        预览链接: ${statusData.preview_url}
+                    </div>
+                    <button onclick="downloadVideo('${videoId}')">下载此视频</button>
+                `;
+            } catch (error) {
+                document.getElementById('existing-result').innerHTML = `
+                    <div class="error">获取视频状态失败: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function createTestVideo() {
+            try {
+                const response = await fetch('/api/video/create-test-video', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.video_id) {
+                    document.getElementById('create-result').innerHTML = `
+                        <div class="success">
+                            测试视频创建成功!<br>
+                            视频ID: ${data.video_id}<br>
+                            文件路径: ${data.file_path}<br>
+                            文件存在: ${data.file_exists}
+                        </div>
+                        <button onclick="downloadVideo('${data.video_id}')">下载测试视频</button>
+                    `;
+                    document.getElementById('videoId').value = data.video_id;
+                } else {
+                    document.getElementById('create-result').innerHTML = `
+                        <div class="error">创建失败: ${data.error}</div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('create-result').innerHTML = `
+                    <div class="error">创建失败: ${error.message}</div>
+                `;
+            }
+        }
+
+        function downloadVideo(videoId) {
+            const link = document.createElement('a');
+            link.href = `/api/video/download/${videoId}`;
+            link.download = `video_${videoId}.mp4`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            log('下载开始!', 'success');
+        }
+
+        function downloadMethod1() {
+            const videoId = document.getElementById('videoId').value;
+            if (!videoId) {
+                log('请输入视频ID', 'error');
+                return;
+            }
+            downloadVideo(videoId);
+        }
+
+        async function downloadMethod2() {
+            const videoId = document.getElementById('videoId').value;
+            if (!videoId) {
+                log('请输入视频ID', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/video/download/${videoId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `video_${videoId}.mp4`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                window.URL.revokeObjectURL(url);
+                log('Fetch下载成功!', 'success');
+            } catch (error) {
+                log(`Fetch下载失败: ${error.message}`, 'error');
+            }
+        }
+
+        function downloadMethod3() {
+            const videoId = document.getElementById('videoId').value;
+            if (!videoId) {
+                log('请输入视频ID', 'error');
+                return;
+            }
+            
+            window.open(`/api/video/download/${videoId}`, '_blank');
+            log('在新窗口打开下载链接', 'success');
+        }
+    </script>
+</body>
+</html>

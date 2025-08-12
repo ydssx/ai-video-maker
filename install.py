@@ -22,17 +22,26 @@ def install_python_deps():
         print("✗ Python 依赖安装失败")
         return False
 
+def get_npm_command():
+    """获取正确的 npm 命令"""
+    import platform
+    if platform.system() == "Windows":
+        return "npm.cmd"
+    return "npm"
+
 def install_node_deps():
     """安装 Node.js 依赖"""
     print("安装前端依赖...")
     os.chdir('frontend')
     
+    npm_cmd = get_npm_command()
+    
     try:
-        subprocess.run(['npm', 'install'], check=True)
+        subprocess.run([npm_cmd, 'install'], check=True, shell=True)
         print("✓ 前端依赖安装完成")
         return True
-    except subprocess.CalledProcessError:
-        print("✗ 前端依赖安装失败")
+    except subprocess.CalledProcessError as e:
+        print(f"✗ 前端依赖安装失败: {e}")
         return False
     finally:
         os.chdir('..')

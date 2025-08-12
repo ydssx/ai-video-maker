@@ -78,7 +78,11 @@ def create_video_from_script(video_id: str, request: VideoRequest):
                 print(f"音频合并失败: {str(e)}")
         
         # 导出视频
-        output_path = f"../output/{video_id}.mp4"
+        import os
+        output_dir = os.path.abspath("../output")
+        os.makedirs(output_dir, exist_ok=True)
+        output_path = os.path.join(output_dir, f"{video_id}.mp4")
+        
         final_video.write_videofile(
             output_path,
             fps=24,
@@ -226,7 +230,11 @@ def wrap_text(text: str, font, max_width: int) -> list:
 
 def get_template_style(template_id: str) -> dict:
     """获取模板样式"""
-    templates = {
+    # 导入模板模块
+    from templates import business, lifestyle, education
+    
+    # 基础模板
+    base_templates = {
         "default": {
             "font_size": 48,
             "font_color": (255, 255, 255),
@@ -257,7 +265,39 @@ def get_template_style(template_id: str) -> dict:
         }
     }
     
-    return templates.get(template_id, templates["default"])
+    # 商务模板
+    business_templates = {
+        "corporate": business.get_corporate_style(),
+        "startup": business.get_startup_style(),
+        "finance": business.get_finance_style(),
+        "ecommerce": business.get_ecommerce_style()
+    }
+    
+    # 生活方式模板
+    lifestyle_templates = {
+        "food": lifestyle.get_food_style(),
+        "travel": lifestyle.get_travel_style(),
+        "fitness": lifestyle.get_fitness_style(),
+        "beauty": lifestyle.get_beauty_style()
+    }
+    
+    # 教育模板
+    education_templates = {
+        "academic": education.get_academic_style(),
+        "kids": education.get_kids_style(),
+        "language": education.get_language_style(),
+        "skill": education.get_skill_style()
+    }
+    
+    # 合并所有模板
+    all_templates = {
+        **base_templates,
+        **business_templates,
+        **lifestyle_templates,
+        **education_templates
+    }
+    
+    return all_templates.get(template_id, base_templates["default"])
 
 def get_scene_image(keywords: list) -> str:
     """获取场景图片URL"""
@@ -293,76 +333,161 @@ async def create_video(request: VideoRequest, background_tasks: BackgroundTasks)
 @router.get("/status/{video_id}")
 async def get_video_status(video_id: str):
     """获取视频制作状态"""
-    if video_id not in video_status:
-        raise HTTPException(status_code=404, detail="视频不存在")
+    import os
     
-    status = video_status[video_id]
-    response_data = {
-        "video_id": video_id,
-        "status": status
-    }
+    # 检查文件是否存在
+    output_dir = os.path.abspath("../output")
+    file_path = os.path.join(output_dir, f"{video_id}.mp4")
     
-    if status == "completed":
-        response_data["download_url"] = f"/api/video/download/{video_id}"
-        response_data["preview_url"] = f"/output/{video_id}.mp4"
+    if os.path.exists(file_path):
+        # 文件存在，视频已完成
+        response_data = {
+            "video_id": video_id,
+            "status": "completed",
+            "download_url": f"/api/video/download/{video_id}",
+            "preview_url": f"/output/{video_id}.mp4"
+        }
+        return response_data
     
-    return response_data
+    # 检查内存状态
+    if video_id in video_status:
+        status = video_status[video_id]
+        response_data = {
+            "video_id": video_id,
+            "status": status
+        }
+        
+        if status == "completed":
+            response_data["download_url"] = f"/api/video/download/{video_id}"
+            response_data["preview_url"] = f"/output/{video_id}.mp4"
+        
+        return response_data
+    
+    # 视频不存在
+    raise HTTPException(status_code=404, detail="视频不存在")
 
 @router.get("/templates")
 async def get_video_templates():
     """获取视频模板"""
     templates = [
+        # 基础模板
         {
             "id": "default",
             "name": "默认模板",
             "description": "经典的白色文字居中显示，适合各种内容",
             "category": "通用",
-            "preview": "/templates/default_preview.jpg",
-            "settings": {
-                "font_size": 48,
-                "font_color": "white",
-                "text_position": "center",
-                "background_overlay": None
-            }
+            "preview": "/templates/default_preview.jpg"
         },
         {
             "id": "modern",
             "name": "现代简约",
             "description": "简洁现代的设计风格，适合商务和科技内容",
-            "category": "商务",
-            "preview": "/templates/modern_preview.jpg", 
-            "settings": {
-                "font_size": 42,
-                "font_color": "#2D2D2D",
-                "text_position": "bottom",
-                "background_overlay": "rgba(255,255,255,0.4)"
-            }
+            "category": "通用",
+            "preview": "/templates/modern_preview.jpg"
         },
         {
             "id": "tech",
             "name": "科技风格",
             "description": "科技感十足，适合技术和创新内容",
-            "category": "科技",
-            "preview": "/templates/tech_preview.jpg",
-            "settings": {
-                "font_size": 46,
-                "font_color": "#00FFFF",
-                "text_position": "center",
-                "background_overlay": "rgba(0,0,0,0.5)"
-            }
+            "category": "通用",
+            "preview": "/templates/tech_preview.jpg"
         },
         {
             "id": "elegant",
             "name": "优雅风格",
             "description": "优雅精致，适合生活方式和艺术内容",
+            "category": "通用",
+            "preview": "/templates/elegant_preview.jpg"
+        },
+        
+        # 商务模板
+        {
+            "id": "corporate",
+            "name": "企业商务",
+            "description": "专业商务风格，适合企业宣传和产品介绍",
+            "category": "商务",
+            "preview": "/templates/corporate_preview.jpg"
+        },
+        {
+            "id": "startup",
+            "name": "创业活力",
+            "description": "年轻活力的创业风格，适合新兴企业",
+            "category": "商务",
+            "preview": "/templates/startup_preview.jpg"
+        },
+        {
+            "id": "finance",
+            "name": "金融理财",
+            "description": "稳重专业的金融风格，适合理财和投资内容",
+            "category": "商务",
+            "preview": "/templates/finance_preview.jpg"
+        },
+        {
+            "id": "ecommerce",
+            "name": "电商购物",
+            "description": "活泼的购物风格，适合产品展示和促销",
+            "category": "商务",
+            "preview": "/templates/ecommerce_preview.jpg"
+        },
+        
+        # 生活方式模板
+        {
+            "id": "food",
+            "name": "美食诱惑",
+            "description": "温暖的美食风格，适合美食分享和餐厅推广",
             "category": "生活",
-            "preview": "/templates/elegant_preview.jpg",
-            "settings": {
-                "font_size": 40,
-                "font_color": "#8B4513",
-                "text_position": "top",
-                "background_overlay": "rgba(255,248,220,0.3)"
-            }
+            "preview": "/templates/food_preview.jpg"
+        },
+        {
+            "id": "travel",
+            "name": "旅行探索",
+            "description": "清新的旅游风格，适合旅游攻略和风景分享",
+            "category": "生活",
+            "preview": "/templates/travel_preview.jpg"
+        },
+        {
+            "id": "fitness",
+            "name": "健身运动",
+            "description": "动感的运动风格，适合健身和运动内容",
+            "category": "生活",
+            "preview": "/templates/fitness_preview.jpg"
+        },
+        {
+            "id": "beauty",
+            "name": "美妆时尚",
+            "description": "时尚的美妆风格，适合美妆教程和时尚分享",
+            "category": "生活",
+            "preview": "/templates/beauty_preview.jpg"
+        },
+        
+        # 教育模板
+        {
+            "id": "academic",
+            "name": "学术教育",
+            "description": "严谨的学术风格，适合教育机构和学术内容",
+            "category": "教育",
+            "preview": "/templates/academic_preview.jpg"
+        },
+        {
+            "id": "kids",
+            "name": "儿童教育",
+            "description": "活泼可爱的儿童风格，适合儿童教育内容",
+            "category": "教育",
+            "preview": "/templates/kids_preview.jpg"
+        },
+        {
+            "id": "language",
+            "name": "语言学习",
+            "description": "国际化的语言学习风格，适合语言教学",
+            "category": "教育",
+            "preview": "/templates/language_preview.jpg"
+        },
+        {
+            "id": "skill",
+            "name": "技能培训",
+            "description": "专业的技能培训风格，适合职业技能教学",
+            "category": "教育",
+            "preview": "/templates/skill_preview.jpg"
         }
     ]
     return {"templates": templates}
@@ -395,16 +520,18 @@ async def download_video(video_id: str):
     from fastapi.responses import FileResponse
     import os
     
-    if video_id not in video_status:
-        raise HTTPException(status_code=404, detail="视频不存在")
-    
-    if video_status[video_id] != "completed":
-        raise HTTPException(status_code=400, detail="视频还未制作完成")
-    
-    file_path = f"../output/{video_id}.mp4"
+    # 直接检查文件是否存在，不依赖内存状态
+    output_dir = os.path.abspath("../output")
+    file_path = os.path.join(output_dir, f"{video_id}.mp4")
     
     if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="视频文件不存在")
+        # 调试信息
+        print(f"查找视频文件: {file_path}")
+        print(f"输出目录存在: {os.path.exists(output_dir)}")
+        if os.path.exists(output_dir):
+            files = os.listdir(output_dir)
+            print(f"输出目录中的文件: {files}")
+        raise HTTPException(status_code=404, detail=f"视频文件不存在")
     
     return FileResponse(
         path=file_path,
@@ -417,6 +544,57 @@ async def download_video(video_id: str):
             "Access-Control-Allow-Headers": "*"
         }
     )
+
+@router.post("/create-test-video")
+async def create_test_video():
+    """创建测试视频"""
+    import uuid
+    import os
+    from moviepy.editor import ColorClip, TextClip, CompositeVideoClip
+    
+    try:
+        video_id = str(uuid.uuid4())
+        
+        # 创建简单的测试视频
+        background = ColorClip(size=(1280, 720), color=(0, 100, 200), duration=3)
+        
+        try:
+            text = TextClip("测试视频", fontsize=50, color='white', font='Arial')
+            text = text.set_position('center').set_duration(3)
+            video = CompositeVideoClip([background, text])
+        except:
+            # 如果文字创建失败，只使用背景
+            video = background
+        
+        # 确保输出目录存在
+        output_dir = os.path.abspath("../output")
+        os.makedirs(output_dir, exist_ok=True)
+        output_path = os.path.join(output_dir, f"{video_id}.mp4")
+        
+        # 导出视频
+        video.write_videofile(
+            output_path,
+            fps=24,
+            codec='libx264',
+            verbose=False,
+            logger=None
+        )
+        
+        # 更新状态
+        video_status[video_id] = "completed"
+        
+        return {
+            "video_id": video_id,
+            "status": "completed",
+            "file_path": output_path,
+            "file_exists": os.path.exists(output_path)
+        }
+        
+    except Exception as e:
+        return {
+            "error": str(e),
+            "status": "failed"
+        }
 
 class VoicePreviewRequest(BaseModel):
     text: str

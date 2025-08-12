@@ -83,22 +83,32 @@ def start_backend():
     os.chdir('..')
     return True
 
+def get_npm_command():
+    """获取正确的 npm 命令"""
+    import platform
+    if platform.system() == "Windows":
+        return "npm.cmd"
+    return "npm"
+
 def start_frontend():
     """启动前端服务"""
     print("启动前端服务...")
     os.chdir('frontend')
     
+    npm_cmd = get_npm_command()
+    
     # 检查是否安装了 npm 依赖
     if not Path('node_modules').exists():
         print("安装前端依赖...")
         try:
-            subprocess.run(['npm', 'install'], check=True)
-        except subprocess.CalledProcessError:
-            print("✗ 前端依赖安装失败")
+            subprocess.run([npm_cmd, 'install'], check=True, shell=True)
+        except subprocess.CalledProcessError as e:
+            print(f"✗ 前端依赖安装失败: {e}")
             return False
     
     try:
-        subprocess.Popen(['npm', 'start'])
+        # 在 Windows 上使用 shell=True
+        subprocess.Popen([npm_cmd, 'start'], shell=True)
         print("✓ 前端服务启动成功 (http://localhost:3000)")
     except Exception as e:
         print(f"✗ 前端服务启动失败: {e}")

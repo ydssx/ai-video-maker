@@ -6,6 +6,7 @@ import VideoPreview from './components/VideoPreview';
 import VideoExport from './components/VideoExport';
 import { HelpModal } from './components/HelpTips';
 import UserDashboard from './components/UserDashboard';
+import DownloadTest from './components/DownloadTest';
 import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 
@@ -18,6 +19,7 @@ function App() {
   const [videoId, setVideoId] = useState(null);
   const [helpVisible, setHelpVisible] = useState(false);
   const [dashboardVisible, setDashboardVisible] = useState(false);
+  const [debugVisible, setDebugVisible] = useState(false);
 
   const steps = [
     {
@@ -92,6 +94,15 @@ function App() {
               >
                 帮助
               </Button>
+              {process.env.NODE_ENV === 'development' && (
+                <Button 
+                  type="text" 
+                  onClick={() => setDebugVisible(true)}
+                  style={{ color: 'white' }}
+                >
+                  调试
+                </Button>
+              )}
               <div style={{ color: 'white', fontSize: '14px' }}>
                 {script && videoId ? '已完成' : script ? '进行中' : '开始制作'}
                 {script && videoId && <CheckCircleOutlined style={{ marginLeft: 8 }} />}
@@ -195,6 +206,16 @@ function App() {
         width={400}
       >
         <UserDashboard />
+      </Drawer>
+      
+      <Drawer
+        title="下载调试工具"
+        placement="right"
+        onClose={() => setDebugVisible(false)}
+        open={debugVisible}
+        width={600}
+      >
+        <DownloadTest />
       </Drawer>
     </Layout>
     </ErrorBoundary>

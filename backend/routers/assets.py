@@ -10,48 +10,28 @@ UNSPLASH_ACCESS_KEY = os.getenv("UNSPLASH_ACCESS_KEY")
 @router.get("/images/search")
 async def search_images(query: str, count: int = 5) -> Dict:
     """搜索图片素材"""
+    from services.content_service import content_service
+    
     try:
-        # 使用 Unsplash API 搜索图片
-        if UNSPLASH_ACCESS_KEY:
-            url = "https://api.unsplash.com/search/photos"
-            headers = {"Authorization": f"Client-ID {UNSPLASH_ACCESS_KEY}"}
-            params = {
-                "query": query,
-                "per_page": count,
-                "orientation": "landscape"
-            }
-            
-            response = requests.get(url, headers=headers, params=params)
-            if response.status_code == 200:
-                data = response.json()
-                images = []
-                for photo in data["results"]:
-                    images.append({
-                        "id": photo["id"],
-                        "url": photo["urls"]["regular"],
-                        "thumb": photo["urls"]["thumb"],
-                        "description": photo["description"] or photo["alt_description"],
-                        "author": photo["user"]["name"],
-                        "download_url": photo["links"]["download"]
-                    })
-                return {"images": images}
-        
-        # 如果没有配置 Unsplash，返回默认图片
-        default_images = []
-        for i in range(count):
-            default_images.append({
-                "id": f"default_{i}",
-                "url": f"https://picsum.photos/800/600?random={hash(query + str(i)) % 1000}",
-                "thumb": f"https://picsum.photos/200/150?random={hash(query + str(i)) % 1000}",
-                "description": f"默认图片 - {query}",
-                "author": "Picsum",
-                "download_url": f"https://picsum.photos/800/600?random={hash(query + str(i)) % 1000}"
-            })
-        
-        return {"images": default_images}
-        
+        images = await content_service.search_images(query, count)
+        return {"images": images}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"图片搜索失败: {str(e)}")
+
+@router.post("/images/smart-search")
+async def smart_image_search(request: dict) -> Dict:
+    """智能图片搜索"""
+    from services.content_service import content_service
+    
+    try:
+        keywords = request.get("keywords", [])
+        style = request.get("style", "educational")
+        template_id = request.get("template_id", "default")
+        
+        images = await content_service.get_smart_images(keywords, style, template_id)
+        return {"images": images}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"智能图片搜索失败: {str(e)}")
 
 @router.get("/music/library")
 async def get_music_library():
@@ -84,6 +64,21 @@ async def get_music_library():
         }
     ]
     return {"music": music_library}
+
+@router.post("/music/recommendations")
+async def get_music_recommendations(request: dict):
+    """获取音乐推荐"""
+    from services.content_service import content_service
+    
+    try:
+        style = request.get("style", "educational")
+        template_id = request.get("template_id", "default")
+        duration = request.get("duration", 30.0)
+        
+        recommendations = content_service.get_music_recommendations(style, template_id, duration)
+        return {"recommendations": recommendations}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"音乐推荐失败: {str(e)}")
 
 @router.get("/fonts")
 async def get_fonts():
