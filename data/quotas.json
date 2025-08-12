@@ -1,0 +1,13 @@
+{
+  "anonymous_user": {
+    "daily_scripts": 10,
+    "daily_videos": 5,
+    "monthly_scripts": 100,
+    "monthly_videos": 50,
+    "used_today_scripts": 2,
+    "used_today_videos": 1,
+    "last_reset_date": "2025-08-12",
+    "used_month_scripts": 2,
+    "used_month_videos": 1
+  }
+}

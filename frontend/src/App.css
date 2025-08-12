@@ -1,0 +1,214 @@
+.layout {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.steps-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.main-content-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.steps-content-wrapper {
+  min-height: 500px;
+  padding: 24px;
+}
+
+.steps-action {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 24px;
+  background: #fafafa;
+  margin: 0 -24px -24px -24px;
+  padding: 24px;
+  border-radius: 0 0 12px 12px;
+}
+
+.script-form {
+  max-width: 100%;
+  margin: 0;
+}
+
+.script-form .ant-form-item-label > label {
+  font-weight: 600;
+  color: #262626;
+}
+
+.script-form .ant-input,
+.script-form .ant-select-selector {
+  border-radius: 8px;
+  border: 2px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.script-form .ant-input:focus,
+.script-form .ant-select-focused .ant-select-selector {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+}
+
+.scene-card {
+  margin-bottom: 16px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.scene-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.scene-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 16px;
+  font-weight: 600;
+}
+
+.scene-content {
+  padding: 20px;
+}
+
+.video-preview {
+  text-align: center;
+  padding: 40px;
+}
+
+.video-player {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.export-options {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.download-section {
+  text-align: center;
+  padding: 40px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.template-selector {
+  margin-bottom: 24px;
+}
+
+.template-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.template-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.template-selected {
+  border: 2px solid #1890ff !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+}
+
+.template-preview {
+  height: 80px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.template-preview::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  opacity: 0.3;
+}
+
+.template-info {
+  position: relative;
+  z-index: 1;
+}
+
+.template-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #1890ff;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  animation: checkmark 0.3s ease-in-out;
+}
+
+@keyframes checkmark {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 新增样式 */
+.ant-steps-item-finish .ant-steps-item-icon {
+  background-color: #52c41a;
+  border-color: #52c41a;
+}
+
+.ant-steps-item-process .ant-steps-item-icon {
+  background-color: #1890ff;
+  border-color: #1890ff;
+}
+
+.suggestion-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+}
+
+.suggestion-card .ant-card-head-title {
+  color: white;
+}
+
+.loading-animation {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
