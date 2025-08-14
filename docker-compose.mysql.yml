@@ -12,33 +12,33 @@ services:
       - MAX_VIDEO_DURATION=300
       - DEFAULT_VIDEO_RESOLUTION=1280x720
       - DEFAULT_TTS_PROVIDER=gtts
-      - DATABASE_URL=${DATABASE_URL:-sqlite:///data/app.db}
-      - MYSQL_HOST=${MYSQL_HOST:-mysql}
-      - MYSQL_PORT=${MYSQL_PORT:-3306}
-      - MYSQL_USER=${MYSQL_USER:-root}
+      - DATABASE_URL=mysql+pymysql://${MYSQL_USER:-aiuser}:${MYSQL_PASSWORD:-password}@mysql:3306/${MYSQL_DATABASE:-ai_video_maker}
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=${MYSQL_USER:-aiuser}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:-password}
       - MYSQL_DATABASE=${MYSQL_DATABASE:-ai_video_maker}
     volumes:
       - ./uploads:/app/uploads
       - ./output:/app/output
-      - ./data:/app/data
       - ./assets:/app/assets
       - ./templates:/app/templates
       - ./logs:/app/logs
     restart: unless-stopped
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
 
   mysql:
     image: mysql:8.0
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD:-password}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}
       - MYSQL_DATABASE=${MYSQL_DATABASE:-ai_video_maker}
       - MYSQL_USER=${MYSQL_USER:-aiuser}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:-password}
@@ -48,7 +48,13 @@ services:
       - mysql_data:/var/lib/mysql
       - ./mysql/init:/docker-entrypoint-initdb.d
     restart: unless-stopped
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   nginx:
     image: nginx:alpine
@@ -63,10 +69,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  uploads:
-  output:
-  data:
-  assets:
-  templates:
-  logs:
   mysql_data:

@@ -4,10 +4,10 @@
     "daily_videos": 5,
     "monthly_scripts": 100,
     "monthly_videos": 50,
-    "used_today_scripts": 10,
-    "used_today_videos": 5,
-    "last_reset_date": "2025-08-12",
-    "used_month_scripts": 10,
-    "used_month_videos": 5
+    "used_today_scripts": 1,
+    "used_today_videos": 2,
+    "last_reset_date": "2025-08-14",
+    "used_month_scripts": 16,
+    "used_month_videos": 11
   }
 }

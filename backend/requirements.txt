@@ -35,6 +35,11 @@ matplotlib==3.7.2
 # 数据存储
 python-json-logger==2.0.7
 
+# 数据库支持
+sqlalchemy==2.0.23
+pymysql==1.1.0
+alembic==1.13.1
+
 # 开发工具
 pytest==7.4.3
 pytest-asyncio==0.21.1

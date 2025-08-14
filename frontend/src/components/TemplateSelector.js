@@ -16,10 +16,28 @@ function TemplateSelector({ selectedTemplate, onTemplateChange }) {
 
   const fetchTemplates = async () => {
     try {
+      console.log('正在获取模板...');
       const response = await axios.get('/api/video/templates');
+      console.log('模板数据:', response.data);
       setTemplates(response.data.templates);
     } catch (error) {
       console.error('获取模板失败:', error);
+      // 如果API失败，使用默认模板
+      const defaultTemplates = [
+        {
+          id: 'default',
+          name: '默认模板',
+          description: '经典的白色文字居中显示，适合各种内容',
+          category: '通用'
+        },
+        {
+          id: 'modern',
+          name: '现代模板',
+          description: '简洁现代的设计风格，适合商务和科技内容',
+          category: '通用'
+        }
+      ];
+      setTemplates(defaultTemplates);
     } finally {
       setLoading(false);
     }
@@ -95,7 +113,35 @@ function TemplateSelector({ selectedTemplate, onTemplateChange }) {
 
   return (
     <div>
-      <h4>选择视频模板</h4>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <h4 style={{ margin: 0 }}>选择视频模板</h4>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ fontSize: '12px', color: '#666' }}>
+            当前选中: {selectedTemplate || '无'}
+          </div>
+          <button
+            style={{
+              padding: '4px 8px',
+              fontSize: '12px',
+              border: '1px solid #d9d9d9',
+              borderRadius: '4px',
+              background: 'white',
+              cursor: 'pointer'
+            }}
+            onClick={() => {
+              console.log('测试按钮点击');
+              if (onTemplateChange) {
+                onTemplateChange('modern');
+                console.log('测试调用成功');
+              } else {
+                console.error('onTemplateChange 未定义');
+              }
+            }}
+          >
+            测试
+          </button>
+        </div>
+      </div>
       
       <Tabs 
         activeKey={selectedCategory} 
@@ -114,35 +160,80 @@ function TemplateSelector({ selectedTemplate, onTemplateChange }) {
       <Row gutter={[16, 16]}>
         {getFilteredTemplates(selectedCategory).map(template => (
           <Col span={12} key={template.id}>
-            <Card
-              hoverable
+            <div
               className={`template-card ${selectedTemplate === template.id ? 'template-selected' : ''}`}
-              style={{ position: 'relative' }}
-              onClick={() => onTemplateChange(template.id)}
+              style={{ 
+                position: 'relative',
+                cursor: 'pointer',
+                border: selectedTemplate === template.id ? '2px solid #1890ff' : '1px solid #d9d9d9',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                transition: 'all 0.3s ease',
+                backgroundColor: 'white',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('模板点击:', template.id, template.name);
+                if (onTemplateChange) {
+                  onTemplateChange(template.id);
+                } else {
+                  console.error('onTemplateChange 函数未定义');
+                }
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+              }}
             >
               {selectedTemplate === template.id && (
-                <div className="template-check">
+                <div style={{
+                  position: 'absolute',
+                  top: '8px',
+                  right: '8px',
+                  width: '20px',
+                  height: '20px',
+                  background: '#1890ff',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 2
+                }}>
                   <CheckOutlined style={{ color: 'white', fontSize: 12 }} />
                 </div>
               )}
               
-              <div className="template-preview" style={{ 
+              <div style={{ 
+                height: '80px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                position: 'relative',
+                overflow: 'hidden',
                 background: getTemplatePreview(template),
                 color: getTextColor(template)
               }}>
                 <span style={{ position: 'relative', zIndex: 1 }}>示例文字</span>
               </div>
               
-              <div className="template-info">
+              <div style={{ padding: '12px', background: 'white' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <strong>{template.name}</strong>
+                  <strong style={{ color: '#262626', fontSize: '14px' }}>{template.name}</strong>
                   <Tag color={getCategoryColor(template.category)}>{template.category}</Tag>
                 </div>
-                <p style={{ fontSize: 12, color: '#666', margin: 0 }}>
+                <p style={{ fontSize: 12, color: '#8c8c8c', margin: 0, lineHeight: 1.4 }}>
                   {template.description}
                 </p>
               </div>
-            </Card>
+            </div>
           </Col>
         ))}
       </Row>

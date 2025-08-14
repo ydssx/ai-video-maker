@@ -44,9 +44,14 @@
 - **MoviePy**: 视频处理库
 - **OpenAI API**: AI 脚本生成
 
+### 数据库支持
+- **SQLite**: 默认数据库，适合开发和小规模部署
+- **MySQL**: 可选数据库，适合生产环境和大规模部署
+
 ### 依赖服务
 - **FFmpeg**: 视频音频处理
 - **TTS 引擎**: 文本转语音服务
+- **MySQL**: 可选数据库服务器
 
 ## 快速开始
 
@@ -55,6 +60,7 @@
 - Node.js 16+
 - FFmpeg
 - OpenAI API Key
+- MySQL 5.7+ (可选，默认使用SQLite)
 
 ### 一键安装
 
@@ -100,6 +106,23 @@ python install.py
    - 后端 API: http://localhost:8000
    - API 文档: http://localhost:8000/docs
 
+### MySQL数据库设置（可选）
+
+如果需要使用MySQL数据库以获得更好的性能：
+
+```bash
+# 交互式MySQL设置（推荐）
+python setup_mysql_simple.py
+
+# 或者使用完整版本
+python setup_mysql.py
+
+# 从SQLite迁移到MySQL
+python backend/migrate_to_mysql.py --mysql-url "mysql+pymysql://user:password@host:port/database"
+```
+
+详细的MySQL设置指南请查看 [MYSQL_SETUP.md](MYSQL_SETUP.md)
+
 ### 故障排除
 
 如果遇到问题，可以尝试:
@@ -113,6 +136,9 @@ python fix-frontend.py
 
 # 运行功能测试
 python test_features.py
+
+# 测试数据库连接
+python test_mysql_connection.py --test-models-only
 ```
 
 详细的故障排除指南请查看 [TROUBLESHOOTING.md](TROUBLESHOOTING.md)

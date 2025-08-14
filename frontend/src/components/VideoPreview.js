@@ -32,6 +32,11 @@ function VideoPreview({ script, onVideoCreated }) {
   const [progress, setProgress] = useState(0);
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState('default');
+  
+  // 添加模板变化的调试信息
+  useEffect(() => {
+    console.log('选中的模板已变更:', selectedTemplate);
+  }, [selectedTemplate]);
   const [voiceConfig, setVoiceConfig] = useState({
     provider: 'gtts',
     voice: 'zh',
@@ -150,7 +155,7 @@ function VideoPreview({ script, onVideoCreated }) {
     try {
       // 创建下载链接
       const downloadUrl = `/api/video/download/${videoId}`;
-      
+
       // 创建临时链接并触发下载
       const link = document.createElement('a');
       link.href = downloadUrl;
@@ -158,7 +163,7 @@ function VideoPreview({ script, onVideoCreated }) {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       message.success('开始下载视频');
     } catch (error) {
       console.error('下载失败:', error);
@@ -169,7 +174,7 @@ function VideoPreview({ script, onVideoCreated }) {
   const handleShareVideo = async () => {
     try {
       const shareUrl = `${window.location.origin}/output/${videoId}.mp4`;
-      
+
       // 尝试使用 Web Share API
       if (navigator.share) {
         await navigator.share({
@@ -474,8 +479,8 @@ function VideoPreview({ script, onVideoCreated }) {
               </video>
             </div>
           </Card>
-          
-          <VideoDownload 
+
+          <VideoDownload
             videoId={videoId}
             onNewVideo={() => {
               setVideoId(null);

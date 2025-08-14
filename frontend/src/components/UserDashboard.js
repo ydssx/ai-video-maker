@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Statistic, Progress, Tag, Alert } from 'antd';
-import { 
-  FileTextOutlined, 
-  VideoCameraOutlined, 
+import {
+  FileTextOutlined,
+  VideoCameraOutlined,
   ClockCircleOutlined,
   TrophyOutlined,
   WarningOutlined
@@ -24,7 +24,7 @@ function UserDashboard() {
         axios.get('/api/stats/user-stats'),
         axios.get('/api/stats/user-quota')
       ]);
-      
+
       setUserStats(statsResponse.data.stats);
       setUserQuota(quotaResponse.data.quota);
     } catch (error) {
@@ -105,7 +105,7 @@ function UserDashboard() {
                 size="small"
               />
             </div>
-            
+
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                 <span>视频制作</span>
@@ -140,7 +140,7 @@ function UserDashboard() {
                 size="small"
               />
             </div>
-            
+
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                 <span>视频制作</span>
@@ -161,28 +161,28 @@ function UserDashboard() {
         {/* 配额警告 */}
         {((userQuota?.used_today_scripts || 0) >= (userQuota?.daily_scripts || 10) * 0.8 ||
           (userQuota?.used_today_videos || 0) >= (userQuota?.daily_videos || 5) * 0.8) && (
-          <Col span={24}>
-            <Alert
-              message="配额提醒"
-              description={
-                <div>
-                  {(userQuota?.used_today_scripts || 0) >= (userQuota?.daily_scripts || 10) * 0.8 && (
-                    <div>• 今日脚本生成配额即将用完</div>
-                  )}
-                  {(userQuota?.used_today_videos || 0) >= (userQuota?.daily_videos || 5) * 0.8 && (
-                    <div>• 今日视频制作配额即将用完</div>
-                  )}
-                  <div style={{ marginTop: 8, fontSize: '12px', color: '#666' }}>
-                    配额每日 00:00 重置，升级账户可获得更多配额
+            <Col span={24}>
+              <Alert
+                message="配额提醒"
+                description={
+                  <div>
+                    {(userQuota?.used_today_scripts || 0) >= (userQuota?.daily_scripts || 10) * 0.8 && (
+                      <div>• 今日脚本生成配额即将用完</div>
+                    )}
+                    {(userQuota?.used_today_videos || 0) >= (userQuota?.daily_videos || 5) * 0.8 && (
+                      <div>• 今日视频制作配额即将用完</div>
+                    )}
+                    <div style={{ marginTop: 8, fontSize: '12px', color: '#666' }}>
+                      配额每日 00:00 重置，升级账户可获得更多配额
+                    </div>
                   </div>
-                </div>
-              }
-              type="warning"
-              icon={<WarningOutlined />}
-              showIcon
-            />
-          </Col>
-        )}
+                }
+                type="warning"
+                icon={<WarningOutlined />}
+                showIcon
+              />
+            </Col>
+          )}
 
         {/* 成就系统 */}
         <Col span={24}>

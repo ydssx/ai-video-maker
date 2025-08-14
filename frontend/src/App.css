@@ -49,6 +49,129 @@
   color: rgba(255, 255, 255, 0.65);
 }
 
+/* 模板选择器样式 */
+.template-card {
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+  position: relative;
+  user-select: none;
+}
+
+.template-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.template-card.template-selected {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.template-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  background: #1890ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.template-preview {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  position: relative;
+  overflow: hidden;
+}
+
+.template-preview::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.1);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.template-info {
+  padding: 12px;
+  background: white;
+}
+
+.template-info strong {
+  color: #262626;
+  font-size: 14px;
+}
+
+.template-info p {
+  color: #8c8c8c;
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 4px 0 0 0;
+}
+
+/* 步骤导航样式 */
+.step-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.step-disabled .ant-steps-item-title {
+  color: #d9d9d9 !important;
+}
+
+.step-disabled .ant-steps-item-description {
+  color: #d9d9d9 !important;
+}
+
+/* 加载状态样式 */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .header-content {
+    padding: 0 16px;
+  }
+  
+  .app-content {
+    padding: 16px;
+  }
+  
+  .template-card {
+    margin-bottom: 16px;
+  }
+  
+  .template-preview {
+    height: 60px;
+    font-size: 14px;
+  }
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .header-content {
