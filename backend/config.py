@@ -52,6 +52,16 @@ class Settings(BaseSettings):
     output_path: str = "data/output"
     temp_path: str = "data/temp"
     cache_path: str = "cache"
+    
+    # 云存储配置
+    storage_type: str = "local"  # local, aliyun_oss, aws_s3, tencent_cos, qiniu
+    
+    # 阿里云OSS配置
+    aliyun_access_key: str = ""
+    aliyun_secret_key: str = ""
+    aliyun_oss_bucket: str = ""
+    aliyun_oss_endpoint: str = ""
+    aliyun_oss_region: str = "oss-cn-hangzhou"
 
     # 安全配置
     jwt_secret: str = "your-secret-key-change-in-production"
@@ -132,6 +142,21 @@ class Settings(BaseSettings):
     def has_unsplash_key(self) -> bool:
         """是否配置了Unsplash密钥"""
         return bool(self.unsplash_access_key and self.unsplash_access_key.strip())
+    
+    @property
+    def has_aliyun_oss(self) -> bool:
+        """是否配置了阿里云OSS"""
+        return bool(
+            self.aliyun_access_key and 
+            self.aliyun_secret_key and 
+            self.aliyun_oss_bucket and 
+            self.aliyun_oss_endpoint
+        )
+    
+    @property
+    def is_cloud_storage(self) -> bool:
+        """是否使用云存储"""
+        return self.storage_type != "local"
 
     @property
     def has_redis(self) -> bool:
