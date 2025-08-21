@@ -389,6 +389,20 @@
   transition: all 0.3s ease;
 }
 
+/* Utility classes */
+.text-center {
+  text-align: center;
+}
+
+.mt-16 { margin-top: 16px; }
+.mt-20 { margin-top: 20px; }
+.mt-24 { margin-top: 24px; }
+.mt-40 { margin-top: 40px; }
+
+.mb-16 { margin-bottom: 16px; }
+.mb-20 { margin-bottom: 20px; }
+.mb-24 { margin-bottom: 24px; }
+
 .asset-item:hover {
   border-color: #667eea;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
@@ -434,5 +448,85 @@
   .timeline-controls {
     flex-wrap: wrap;
     gap: 8px;
+  }
+}
+
+/* 步骤导航固定样式 */
+.step-navigation-fixed {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+}
+
+/* 主内容区域样式 */
+.step-content {
+  padding: 24px;
+  min-height: 400px;
+}
+
+.asset-manager-content {
+  padding: 24px;
+}
+
+/* 主CTA按钮样式 */
+.main-cta-button {
+  margin-left: 16px;
+  height: 40px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.main-cta-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+}
+
+.main-cta-button:disabled {
+  box-shadow: none;
+  transform: none;
+}
+
+/* Header优化样式 */
+.header-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.header-actions .ant-btn-link {
+  color: white;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+}
+
+.header-actions .ant-btn-link:hover {
+  opacity: 1;
+  color: white;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .header-content {
+    padding: 0 16px;
+  }
+  
+  .header-actions {
+    gap: 8px;
+  }
+  
+  .main-cta-button {
+    margin-left: 8px;
+    font-size: 14px;
+    padding: 0 16px;
+  }
+  
+  .step-content,
+  .asset-manager-content {
+    padding: 16px;
   }
 }

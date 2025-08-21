@@ -6,8 +6,8 @@
 import os
 import logging
 from typing import Union
-from services.database_service import DatabaseService
-from services.mysql_database_service import MySQLDatabaseService
+from src.services.database_service import DatabaseService
+from src.services.mysql_database_service import MySQLDatabaseService
 
 logger = logging.getLogger(__name__)
 

@@ -11,18 +11,22 @@ const LoginPage = () => {
   const { actions } = useAppContext();
 
   const onFinish = async (values) => {
+    console.log('开始登录，表单数据:', values);
     setLoading(true);
     try {
       const response = await login(values);
+      console.log('登录API响应:', response);
       const { access_token, user } = response.data;
       
       localStorage.setItem('token', access_token);
       actions.setUser(user);
       actions.setIsAuthenticated(true);
       
+      console.log('登录成功，跳转到首页');
       message.success('登录成功！');
       navigate('/');
     } catch (error) {
+      console.error('登录出错:', error);
       message.error(error.response?.data?.detail || '登录失败，请检查您的凭据。');
     } finally {
       setLoading(false);

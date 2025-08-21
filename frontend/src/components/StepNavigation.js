@@ -7,7 +7,8 @@ import {
   DownloadOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined,
+  FolderOutlined
 } from '@ant-design/icons';
 import { useAppContext } from '../contexts/AppContext';
 
@@ -211,6 +212,12 @@ const StepNavigation = ({
       </div>
     );
   };
+
+  const getProgressPercent = () => {
+    const completedSteps = steps.filter(step => step.status === 'finish').length;
+    const totalSteps = steps.length;
+    return (completedSteps / totalSteps) * 100;
+  };
   
   // 紧凑模式
   if (compact) {
@@ -246,34 +253,45 @@ const StepNavigation = ({
   
   // 完整模式
   return (
-    <Card className="steps-card" style={{ marginBottom: '16px' }}>
-      {renderProgressInfo()}
-      
-      <Steps
-        current={app.currentStep}
-        onChange={handleStepClick}
-        type="navigation"
-        size="small"
-      >
-        {steps.map((step, index) => {
-          const isAccessible = isStepAccessible(index);
+    <div className="step-navigation-fixed">
+      <div className="content-container">
+        <Card className="steps-card" style={{ margin: 0, borderRadius: 0, borderLeft: 'none', borderRight: 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, marginRight: 16 }}>制作进度</h3>
+              <Progress 
+                percent={getProgressPercent()} 
+                size="small" 
+                style={{ width: 200 }}
+                format={(percent) => `${Math.round(percent / 25)}/4 步骤`}
+              />
+            </div>
+            
+          </div>
           
-          return (
-            <Step
-              key={index}
-              title={step.title}
-              description={step.description}
-              icon={getStepStatusIcon(step, index)}
-              status={step.status}
-              className={!isAccessible ? 'step-disabled' : ''}
-              disabled={!isAccessible}
-            />
-          );
-        })}
-      </Steps>
-      
-      {renderQuickActions()}
-    </Card>
+          <Steps 
+            current={app.currentStep} 
+            size="small"
+            style={{ marginBottom: 0 }}
+          >
+            {steps.map((step, index) => (
+              <Step
+                key={step.key}
+                title={step.title}
+                description={step.description}
+                icon={getStepStatusIcon(step, index)}
+                status={step.status}
+                onClick={() => isStepAccessible(index) && onStepChange(index)}
+                style={{ 
+                  cursor: isStepAccessible(index) ? 'pointer' : 'default',
+                  opacity: isStepAccessible(index) ? 1 : 0.6
+                }}
+              />
+            ))}
+          </Steps>
+        </Card>
+      </div>
+    </div>
   );
 };
 

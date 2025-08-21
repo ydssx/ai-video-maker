@@ -1,22 +1,33 @@
 import React, { useState } from 'react';
-import { Layout, Button, Alert, Drawer, Space, Badge, Menu } from 'antd';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Layout, Button, Alert, Drawer, Space, Badge, Menu, Dropdown, Tooltip } from 'antd';
 import {
   UserOutlined,
   SettingOutlined,
   QuestionCircleOutlined,
   FolderOutlined,
   DashboardOutlined,
-  ArrowLeftOutlined
+  ArrowLeftOutlined,
+  LogoutOutlined,
+  MoreOutlined,
+  PlayCircleOutlined,
+  SettingOutlined as ConfigOutlined,
+  DownloadOutlined
 } from '@ant-design/icons';
 import { AppProvider, useAppContext } from './contexts/AppContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ScriptGenerator from './components/ScriptGenerator';
+import OptimizedScriptGenerator from './components/OptimizedScriptGenerator';
 import VideoPreview from './components/VideoPreview';
 import StandaloneAssetManager from './components/StandaloneAssetManager';
 import UserDashboard from './components/UserDashboard';
 import StepNavigation from './components/StepNavigation';
 import { FullScreenLoader } from './components/LoadingIndicator';
 import PerformancePage from './components/performance/PerformancePage';
+import AuthPage from './components/auth/AuthPage';
+import PrivateRoute from './components/auth/PrivateRoute';
 import './App.css';
+import { t } from './utils/i18n';
 
 const { Header, Content, Footer } = Layout;
 
@@ -24,9 +35,16 @@ const { Header, Content, Footer } = Layout;
 const AppContent = () => {
   const { state, actions } = useAppContext();
   const { app, project } = state;
+  const { logout } = useAuth();
+  const location = useLocation();
   const [showUserDashboard, setShowUserDashboard] = useState(false);
   const [showAssetManager, setShowAssetManager] = useState(false);
   const [showPerformance, setShowPerformance] = useState(false);
+  
+  // 如果当前路径是登录或注册页面，则重定向到首页
+  if (location.pathname === '/login' || location.pathname === '/register') {
+    return <Navigate to="/" replace />;
+  }
 
   const handleScriptGenerated = (generatedScript) => {
     actions.setScript(generatedScript);
@@ -44,6 +62,63 @@ const AppContent = () => {
     actions.setCurrentStep(step);
   };
 
+  // 获取当前步骤的主CTA按钮
+  const getMainCTAButton = () => {
+    if (app.currentStep === 0) {
+      return null; // 脚本生成步骤不需要主CTA
+    }
+    
+    if (app.currentStep === 1) {
+      return (
+        <Tooltip title="配置完成后开始制作视频">
+          <Button 
+            type="primary" 
+            size="large"
+            icon={<PlayCircleOutlined />}
+            onClick={() => actions.setCurrentStep(2)}
+            disabled={!project.script}
+            style={{ marginLeft: 16 }}
+          >
+            开始制作视频
+          </Button>
+        </Tooltip>
+      );
+    }
+    
+    if (app.currentStep === 2) {
+      return (
+        <Tooltip title="预览并确认视频效果">
+          <Button 
+            type="primary" 
+            size="large"
+            icon={<PlayCircleOutlined />}
+            onClick={() => actions.setCurrentStep(3)}
+            style={{ marginLeft: 16 }}
+          >
+            前往导出
+          </Button>
+        </Tooltip>
+      );
+    }
+    
+    if (app.currentStep === 3) {
+      return (
+        <Tooltip title="下载制作完成的视频">
+          <Button 
+            type="primary" 
+            size="large"
+            icon={<DownloadOutlined />}
+            style={{ marginLeft: 16 }}
+          >
+            下载视频
+          </Button>
+        </Tooltip>
+      );
+    }
+    
+    return null;
+  };
+
   const renderMainContent = () => {
     if (showPerformance) {
       return (
@@ -53,31 +128,30 @@ const AppContent = () => {
 
     return (
       <>
-        {/* 步骤导航 */}
-        {!showAssetManager && (
-          <StepNavigation 
-            onStepChange={handleStepChange}
-            showProgress={true}
-            showQuickActions={true}
-          />
-        )}
+        {/* 步骤导航 - 始终固定在顶部 */}
+        <StepNavigation 
+          onStepChange={handleStepChange}
+          showProgress={true}
+          showQuickActions={true}
+          compact={false}
+        />
 
         {/* 主要内容区域 */}
         <div className="main-content">
           {!showAssetManager ? (
             <>
               {app.currentStep === 0 && (
-                <div>
-                  <ScriptGenerator onScriptGenerated={handleScriptGenerated} />
+                <div className="step-content">
+                  <OptimizedScriptGenerator onScriptGenerated={handleScriptGenerated} />
                 </div>
               )}
 
               {app.currentStep >= 1 && app.currentStep <= 3 && (
-                <div>
+                <div className="step-content">
                   {app.currentStep === 1 && (
                     <Alert
                       message="配置视频"
-                      description="现在可以配置视频模板、样式、音频等设置，完成后点击'开始制作视频'。"
+                      description="现在可以配置视频模板、样式、音频等设置，完成后点击右上角的'开始制作视频'按钮。"
                       type="info"
                       showIcon
                       style={{ marginBottom: 16 }}
@@ -92,7 +166,7 @@ const AppContent = () => {
               )}
             </>
           ) : (
-            <div>
+            <div className="asset-manager-content">
               <div style={{ marginBottom: 16, textAlign: 'right' }}>
                 <Button onClick={() => setShowAssetManager(false)}>
                   返回制作
@@ -122,6 +196,10 @@ const AppContent = () => {
           </h1>
           <div className="header-actions">
             <Space>
+              {/* 主CTA按钮 */}
+              {getMainCTAButton()}
+              
+              {/* 资源管理 - 主要功能 */}
               <Badge dot={project.isDirty}>
                 <Button
                   type="link"
@@ -133,38 +211,26 @@ const AppContent = () => {
                 </Button>
               </Badge>
               
-              <Button
-                type="link"
-                style={{ color: 'white' }}
-                icon={<UserOutlined />}
-                onClick={() => setShowUserDashboard(true)}
+              {/* 更多功能下拉菜单 */}
+              <Dropdown
+                overlay={
+                  <Menu
+                    items={[
+                      { key: 'performance', label: t('header.performance'), icon: <DashboardOutlined />, onClick: () => setShowPerformance(!showPerformance) },
+                      { key: 'user', label: t('header.user'), icon: <UserOutlined />, onClick: () => setShowUserDashboard(true) },
+                      { key: 'settings', label: t('header.settings'), icon: <SettingOutlined /> },
+                      { key: 'help', label: t('header.help'), icon: <QuestionCircleOutlined /> },
+                      { type: 'divider' },
+                      { key: 'logout', label: t('header.logout'), icon: <LogoutOutlined />, onClick: logout }
+                    ]}
+                  />
+                }
+                placement="bottomRight"
               >
-                用户中心
-              </Button>
-              
-              <Button
-                type="link"
-                style={{ color: 'white' }}
-                icon={<SettingOutlined />}
-              >
-                设置
-              </Button>
-              
-              <Button
-                type="link"
-                style={{ color: 'white' }}
-                icon={<DashboardOutlined />}
-                onClick={() => setShowPerformance(!showPerformance)}
-              >
-                {showPerformance ? '返回应用' : '性能监控'}
-              </Button>
-              <Button
-                type="link"
-                style={{ color: 'white' }}
-                icon={<QuestionCircleOutlined />}
-              >
-                帮助
-              </Button>
+                <Button type="link" style={{ color: 'white' }} icon={<MoreOutlined />}>
+                  更多
+                </Button>
+              </Dropdown>
             </Space>
           </div>
         </div>
@@ -181,7 +247,6 @@ const AppContent = () => {
           AI 短视频制作平台 2024 - 让创作更简单
           {project.isDirty && (
             <span style={{ marginLeft: 16, color: '#faad14' }}>
-              ● 有未保存的更改
             </span>
           )}
         </div>
@@ -213,9 +278,24 @@ const AppContent = () => {
 // 主应用组件
 function App() {
   return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
+    <Router>
+      <AppProvider>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="/register" element={<AuthPage initialTab="register" />} />
+            <Route
+              path="/*"
+              element={
+                <PrivateRoute>
+                  <AppContent />
+                </PrivateRoute>
+              }
+            />
+          </Routes>
+        </AuthProvider>
+      </AppProvider>
+    </Router>
   );
 }
 

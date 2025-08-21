@@ -10,13 +10,19 @@ from middleware.error_handler import error_handling_middleware
 from middleware.logging import logging_middleware, setup_logging
 
 # 导入配置
-from config import settings
+from src.core.config import settings
 
-from routers import (
-    script_generator, video_maker, assets, stats, presets, 
-    user_assets, audio_manager, projects, cloud_storage,
-    users, system
-)
+from src.api.v1 import api_router
+
+# 预加载 Celery 配置（若启用）
+try:
+    from src.services.task_queue import is_celery_enabled
+    if is_celery_enabled():
+        # 导入任务模块以确保 worker 能发现
+        import src.services.tasks.video_tasks  # noqa: F401
+except Exception:
+    # 在无 Celery/Redis 环境下忽略
+    pass
 
 # 导入数据库工厂
 from database_factory import get_db_service
@@ -49,31 +55,12 @@ app.add_middleware(
 )
 
 # 静态文件服务
-app.mount("/assets", StaticFiles(directory="../assets"), name="assets")
-app.mount("/output", StaticFiles(directory="../output"), name="output")
+# app.mount("/assets", StaticFiles(directory="../assets"), name="assets")
+# app.mount("/output", StaticFiles(directory="../data/output"), name="output")
+# app.mount("/uploads", StaticFiles(directory="../data/uploads"), name="uploads")
 
-# 测试页面（仅开发环境）
-import os
-if os.getenv("ENVIRONMENT") != "production":
-    from fastapi.responses import FileResponse
-    
-    @app.get("/test-download")
-    async def test_download_page():
-        return FileResponse("../test-download.html")
-
+app.include_router(api_router)
 # 路由
-app.include_router(script_generator.router, prefix="/api/script", tags=["script"])
-app.include_router(video_maker.router, prefix="/api/video", tags=["video"])
-app.include_router(assets.router, prefix="/api/assets", tags=["assets"])
-app.include_router(stats.router, prefix="/api/stats", tags=["stats"])
-app.include_router(presets.router, prefix="/api/presets", tags=["presets"])
-app.include_router(user_assets.router)
-app.include_router(audio_manager.router)
-app.include_router(projects.router)
-app.include_router(cloud_storage.router)
-app.include_router(users.router, prefix="/api/users", tags=["users"])
-app.include_router(system.router, prefix="/api/system", tags=["system"])
-
 @app.get("/")
 async def root():
     return {"message": "AI Video Maker API"}

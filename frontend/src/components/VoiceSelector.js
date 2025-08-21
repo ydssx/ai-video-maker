@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Select, Switch, Slider, Button, Row, Col, Divider, Alert } from 'antd';
 import { SoundOutlined, PlayCircleOutlined } from '@ant-design/icons';
-import axios from 'axios';
+import api from '../utils/api';
+import { t } from '../utils/i18n';
 
 const { Option } = Select;
 
@@ -16,8 +17,8 @@ function VoiceSelector({ voiceConfig, onVoiceConfigChange }) {
 
   const fetchVoices = async () => {
     try {
-      const response = await axios.get('/api/video/voices');
-      setVoices(response.data.voices);
+      const data = await api.get('/video/voices');
+      setVoices(data.voices || { gtts: [], openai: [] });
     } catch (error) {
       console.error('获取语音选项失败:', error);
     }
@@ -31,15 +32,15 @@ function VoiceSelector({ voiceConfig, onVoiceConfigChange }) {
   const handlePreviewVoice = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('/api/video/preview-voice', {
-        text: "这是一个语音预览示例，您可以听到选择的语音效果。",
+      const data = await api.post('/video/preview-voice', {
+        text: t('voice.preview.sample', '这是一个语音预览示例，您可以听到选择的语音效果。'),
         voice_config: voiceConfig
       });
       
-      setPreviewUrl(response.data.audio_url);
+      setPreviewUrl(data.audio_url);
       
       // 播放音频
-      const audio = new Audio(response.data.audio_url);
+      const audio = new Audio(data.audio_url);
       audio.play();
       
     } catch (error) {
@@ -60,16 +61,16 @@ function VoiceSelector({ voiceConfig, onVoiceConfigChange }) {
   };
 
   return (
-    <Card title="语音配置" size="small">
+    <Card title={t('voice.title', '语音配置')} size="small">
       <Row gutter={[16, 16]}>
         <Col span={24}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span><strong>启用语音：</strong></span>
+            <span><strong>{t('voice.enable', '启用语音：')}</strong></span>
             <Switch 
               checked={voiceConfig.enabled}
               onChange={(checked) => handleConfigChange('enabled', checked)}
-              checkedChildren="开启"
-              unCheckedChildren="关闭"
+              checkedChildren={t('common.on', '开启')}
+              unCheckedChildren={t('common.off', '关闭')}
             />
           </div>
         </Col>
@@ -82,26 +83,26 @@ function VoiceSelector({ voiceConfig, onVoiceConfigChange }) {
 
             <Col span={12}>
               <div>
-                <label><strong>语音服务：</strong></label>
+                <label><strong>{t('voice.provider', '语音服务：')}</strong></label>
                 <Select
                   value={voiceConfig.provider}
                   onChange={(value) => handleConfigChange('provider', value)}
                   style={{ width: '100%', marginTop: 8 }}
                 >
-                  <Option value="gtts">Google TTS（免费）</Option>
-                  <Option value="openai">OpenAI TTS（需要 API 密钥）</Option>
+                  <Option value="gtts">{t('voice.provider.gtts', 'Google TTS（免费）')}</Option>
+                  <Option value="openai">{t('voice.provider.openai', 'OpenAI TTS（需要 API 密钥）')}</Option>
                 </Select>
               </div>
             </Col>
 
             <Col span={12}>
               <div>
-                <label><strong>语音选择：</strong></label>
+                <label><strong>{t('voice.select', '语音选择：')}</strong></label>
                 <Select
                   value={voiceConfig.voice}
                   onChange={(value) => handleConfigChange('voice', value)}
                   style={{ width: '100%', marginTop: 8 }}
-                  placeholder="选择语音"
+                  placeholder={t('voice.select.placeholder', '选择语音')}
                 >
                   {getCurrentVoices().map(voice => (
                     <Option key={voice.id} value={voice.id}>
@@ -119,7 +120,7 @@ function VoiceSelector({ voiceConfig, onVoiceConfigChange }) {
 
             <Col span={24}>
               <div>
-                <label><strong>语速：</strong></label>
+                <label><strong>{t('voice.speed', '语速：')}</strong></label>
                 <Slider
                   min={0.5}
                   max={2.0}
@@ -146,7 +147,7 @@ function VoiceSelector({ voiceConfig, onVoiceConfigChange }) {
                   loading={loading}
                   size="small"
                 >
-                  预览语音效果
+                  {t('voice.preview', '预览语音效果')}
                 </Button>
               </div>
             </Col>
@@ -154,8 +155,8 @@ function VoiceSelector({ voiceConfig, onVoiceConfigChange }) {
             {voiceConfig.provider === 'openai' && (
               <Col span={24}>
                 <Alert
-                  message="OpenAI TTS 说明"
-                  description="使用 OpenAI TTS 需要配置 API 密钥，语音质量更高，支持多种语言和语音风格。"
+                  message={t('voice.openai.title', 'OpenAI TTS 说明')}
+                  description={t('voice.openai.desc', '使用 OpenAI TTS 需要配置 API 密钥，语音质量更高，支持多种语言和语音风格。')}
                   type="info"
                   showIcon
                   style={{ fontSize: '12px' }}

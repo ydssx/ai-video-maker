@@ -9,7 +9,8 @@ import {
   DownloadOutlined,
   FolderOutlined
 } from '@ant-design/icons';
-import axios from 'axios';
+import api from '../utils/api';
+import { t } from '../utils/i18n';
 import TemplateSelector from './TemplateSelector';
 import VoiceSelector from './VoiceSelector';
 import PresetManager from './PresetManager';
@@ -71,8 +72,8 @@ function VideoPreview({ script, onVideoCreated }) {
 
   const fetchTemplates = async () => {
     try {
-      const response = await axios.get('/api/video/templates');
-      setTemplates(response.data.templates);
+      const data = await api.get('/video/templates');
+      setTemplates(data.templates);
     } catch (error) {
       console.error('获取模板失败:', error);
     }
@@ -80,13 +81,13 @@ function VideoPreview({ script, onVideoCreated }) {
 
   const checkVideoStatus = async () => {
     try {
-      const response = await axios.get(`/api/video/status/${videoId}`);
-      setVideoStatus(response.data.status);
+      const data = await api.get(`/video/status/${videoId}`);
+      setVideoStatus(data.status);
 
-      if (response.data.status === 'completed') {
+      if (data.status === 'completed') {
         setProgress(100);
         onVideoCreated(videoId);
-      } else if (response.data.status === 'processing') {
+      } else if (data.status === 'processing') {
         setProgress(prev => Math.min(prev + 10, 90));
       }
     } catch (error) {
@@ -178,14 +179,14 @@ function VideoPreview({ script, onVideoCreated }) {
       // 尝试使用 Web Share API
       if (navigator.share) {
         await navigator.share({
-          title: 'AI 生成的视频',
-          text: '查看我用 AI 制作的视频',
+          title: t('preview.share.title', 'AI 生成的视频'),
+          text: t('preview.share.text', '查看我用 AI 制作的视频'),
           url: shareUrl
         });
       } else {
         // 降级到复制链接
         await navigator.clipboard.writeText(shareUrl);
-        message.success('视频链接已复制到剪贴板');
+        message.success(t('preview.share.copied', '视频链接已复制到剪贴板'));
       }
     } catch (error) {
       console.error('分享失败:', error);
@@ -193,9 +194,9 @@ function VideoPreview({ script, onVideoCreated }) {
       const shareUrl = `${window.location.origin}/output/${videoId}.mp4`;
       try {
         await navigator.clipboard.writeText(shareUrl);
-        message.success('视频链接已复制到剪贴板');
+        message.success(t('preview.share.copied', '视频链接已复制到剪贴板'));
       } catch (clipboardError) {
-        message.info(`视频链接: ${shareUrl}`);
+        message.info(`${t('preview.share.link', '视频链接')}: ${shareUrl}`);
       }
     }
   };
@@ -205,7 +206,7 @@ function VideoPreview({ script, onVideoCreated }) {
     setProgress(10);
 
     try {
-      const response = await axios.post('/api/video/create', {
+      const response = await api.post('/video/create', {
         script: script,
         template_id: selectedTemplate,
         voice_config: voiceConfig,
@@ -215,13 +216,13 @@ function VideoPreview({ script, onVideoCreated }) {
         export_config: exportConfig
       });
 
-      setVideoId(response.data.video_id);
+      setVideoId(response.video_id);
       setVideoStatus('processing');
       setProgress(20);
 
       // 记录统计
       try {
-        await axios.post('/api/stats/record-video', null, {
+        await api.post('/stats/record-video', null, {
           params: {
             duration: script.total_duration
           }
@@ -242,18 +243,18 @@ function VideoPreview({ script, onVideoCreated }) {
     <div className="video-preview">
       {!hasScript && (
         <Alert
-          message="提示"
-          description="您可以先管理素材和项目，或者生成脚本后进行完整的视频制作。"
+          message={t('preview.tip.title', '提示')}
+          description={t('preview.tip.desc', '您可以先管理素材和项目，或者生成脚本后进行完整的视频制作。')}
           type="info"
           showIcon
-          style={{ marginBottom: 24 }}
+          className="mb-24"
         />
       )}
 
       {hasScript && (
         <Row gutter={[24, 24]}>
           <Col span={24}>
-            <Card title="快速预设">
+            <Card title={t('preview.quickPreset', '快速预设')}>
               <PresetManager
                 currentConfig={{
                   template_id: selectedTemplate,
@@ -404,7 +405,7 @@ function VideoPreview({ script, onVideoCreated }) {
         </Col>
       </Row>
 
-      <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
+      <Row gutter={[24, 24]} className="mt-24">
         <Col span={12}>
           <VoiceSelector
             voiceConfig={voiceConfig}
@@ -413,7 +414,7 @@ function VideoPreview({ script, onVideoCreated }) {
         </Col>
 
         <Col span={12}>
-          <Card title="制作设置" size="small">
+          <Card title={t('preview.settings', '制作设置')} size="small">
             <p><strong>分辨率：</strong>1280x720</p>
             <p><strong>帧率：</strong>24fps</p>
             <p><strong>格式：</strong>MP4</p>
@@ -425,7 +426,7 @@ function VideoPreview({ script, onVideoCreated }) {
       </Row>
 
       {!videoId && (
-        <div style={{ textAlign: 'center', marginTop: 40 }}>
+        <div className="text-center mt-40">
           <Button
             type="primary"
             size="large"
@@ -433,13 +434,13 @@ function VideoPreview({ script, onVideoCreated }) {
             onClick={handleCreateVideo}
             loading={loading}
           >
-            开始制作视频
+            {t('preview.start', '开始制作视频')}
           </Button>
         </div>
       )}
 
       {videoId && videoStatus !== 'completed' && (
-        <div style={{ marginTop: 20 }}>
+        <div className="mt-20">
           <VideoGeneratingLoader
             progress={progress}
             currentStep={getVideoStep(progress)}
@@ -449,14 +450,14 @@ function VideoPreview({ script, onVideoCreated }) {
 
       {videoStatus === 'completed' && (
         <div>
-          <Card style={{ marginTop: 20 }}>
-            <div style={{ textAlign: 'center' }}>
+          <Card className="mt-20">
+            <div className="text-center">
               <Alert
-                message="视频制作完成！"
-                description="您的视频已经制作完成，可以预览和下载了。"
+                message={t('preview.done.title', '视频制作完成！')}
+                description={t('preview.done.desc', '您的视频已经制作完成，可以预览和下载了。')}
                 type="success"
                 showIcon
-                style={{ marginBottom: 20 }}
+                className="mb-20"
               />
 
               <video
@@ -466,16 +467,16 @@ function VideoPreview({ script, onVideoCreated }) {
                 src={`/output/${videoId}.mp4`}
                 onError={(e) => {
                   console.error('视频加载失败:', e);
-                  message.error('视频预览加载失败，但您仍可以尝试下载');
+                  message.error(t('preview.video.failed', '视频预览加载失败，但您仍可以尝试下载'));
                 }}
                 onLoadStart={() => {
-                  console.log('开始加载视频');
+                  console.log(t('preview.video.loading', '开始加载视频'));
                 }}
                 onCanPlay={() => {
-                  console.log('视频可以播放');
+                  console.log(t('preview.video.canplay', '视频可以播放'));
                 }}
               >
-                您的浏览器不支持视频播放。
+                {t('preview.video.notsupport', '您的浏览器不支持视频播放。')}
               </video>
             </div>
           </Card>

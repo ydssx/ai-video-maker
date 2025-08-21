@@ -1,0 +1,170 @@
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 20px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 480px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  margin-bottom: 20px;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.auth-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1890ff;
+  margin-bottom: 8px;
+}
+
+.auth-header p {
+  color: #666;
+  margin: 0;
+}
+
+.auth-tabs .ant-tabs-nav {
+  margin-bottom: 24px;
+}
+
+.auth-tabs .ant-tabs-tab {
+  font-size: 16px;
+  padding: 12px 24px;
+}
+
+.auth-tabs .ant-tabs-tab-active {
+  font-weight: 500;
+}
+
+.auth-form .ant-form-item {
+  margin-bottom: 16px;
+}
+
+.auth-form .ant-input-affix-wrapper {
+  padding: 10px 12px;
+  border-radius: 6px;
+}
+
+.auth-form .ant-input-prefix {
+  color: #bfbfbf;
+  margin-right: 8px;
+}
+
+.form-extra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.forgot-password {
+  font-size: 14px;
+}
+
+.social-login {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  font-size: 15px;
+  border-radius: 6px;
+  transition: all 0.3s;
+}
+
+.social-btn .anticon {
+  font-size: 18px;
+  margin-right: 8px;
+}
+
+.social-btn.google {
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.social-btn.google:hover {
+  background: #f5f5f5;
+  border-color: #bfbfbf;
+  color: #1890ff;
+}
+
+.social-btn.github {
+  background: #24292e;
+  border-color: #24292e;
+  color: #fff;
+}
+
+.social-btn.github:hover {
+  background: #1f2428;
+  border-color: #1f2428;
+  color: #fff;
+  opacity: 0.9;
+}
+
+.auth-footer {
+  text-align: center;
+  color: #666;
+}
+
+.auth-footer a {
+  color: #1890ff;
+  margin-left: 4px;
+  cursor: pointer;
+}
+
+/* 响应式设计 */
+@media (max-width: 576px) {
+  .auth-card {
+    padding: 24px;
+  }
+  
+  .auth-header h1 {
+    font-size: 20px;
+  }
+  
+  .auth-tabs .ant-tabs-tab {
+    padding: 8px 16px;
+    font-size: 15px;
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.auth-card {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* 表单验证状态 */
+.ant-form-item-has-error .ant-input,
+.ant-form-item-has-error .ant-input-affix-wrapper,
+.ant-form-item-has-error .ant-input:hover {
+  border-color: #ff4d4f;
+}
+
+.ant-form-item-explain-error {
+  font-size: 12px;
+  margin-top: 4px;
+  color: #ff4d4f;
+}

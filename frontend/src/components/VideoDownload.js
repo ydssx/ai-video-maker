@@ -21,7 +21,8 @@ import {
   CloudDownloadOutlined,
   LinkOutlined
 } from '@ant-design/icons';
-import axios from 'axios';
+import api from '../utils/api';
+import { t } from '../utils/i18n';
 
 function VideoDownload({ videoId, onNewVideo }) {
   const [downloadUrl, setDownloadUrl] = useState('');
@@ -39,11 +40,11 @@ function VideoDownload({ videoId, onNewVideo }) {
 
   const checkVideoStatus = async () => {
     try {
-      const response = await axios.get(`/api/video/status/${videoId}`);
-      if (response.data.status === 'completed') {
-        setDownloadUrl(response.data.download_url);
-        setCloudDownloadUrl(response.data.cloud_download_url);
-        setStorageType(response.data.storage_type || 'local');
+      const data = await api.get(`/video/status/${videoId}`);
+      if (data.status === 'completed') {
+        setDownloadUrl(data.download_url);
+        setCloudDownloadUrl(data.cloud_download_url);
+        setStorageType(data.storage_type || 'local');
       }
     } catch (error) {
       console.error('获取视频状态失败:', error);
@@ -64,10 +65,10 @@ function VideoDownload({ videoId, onNewVideo }) {
       link.click();
       document.body.removeChild(link);
       
-      message.success('开始下载视频');
+      message.success(t('download.start', '开始下载视频'));
     } catch (error) {
       console.error('下载失败:', error);
-      message.error('下载失败，请重试');
+      message.error(t('download.failed', '下载失败，请重试'));
     } finally {
       setDownloading(false);
     }
@@ -77,9 +78,9 @@ function VideoDownload({ videoId, onNewVideo }) {
     try {
       const shareUrl = `${window.location.origin}/output/${videoId}.mp4`;
       await navigator.clipboard.writeText(shareUrl);
-      message.success('视频链接已复制到剪贴板');
+      message.success(t('preview.share.copied', '视频链接已复制到剪贴板'));
     } catch (error) {
-      message.error('复制失败，请手动复制链接');
+      message.error(t('common.copy.failed', '复制失败，请手动复制链接'));
     }
   };
 
@@ -123,12 +124,12 @@ function VideoDownload({ videoId, onNewVideo }) {
   const videoInfo = getVideoInfo();
 
   return (
-    <Card title="视频下载" style={{ marginTop: 20 }}>
+    <Card title={t('download.title', '视频下载')} style={{ marginTop: 20 }}>
       {/* 视频信息 */}
       <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
         <Col span={12}>
           <div>
-            <h4>视频信息</h4>
+            <h4>{t('download.info', '视频信息')}</h4>
             <p><strong>格式:</strong> {videoInfo.format}</p>
             <p><strong>分辨率:</strong> {videoInfo.resolution}</p>
             <p><strong>帧率:</strong> {videoInfo.fps} fps</p>
@@ -137,20 +138,20 @@ function VideoDownload({ videoId, onNewVideo }) {
         </Col>
         <Col span={12}>
           <div>
-            <h4>存储状态</h4>
+            <h4>{t('download.storage', '存储状态')}</h4>
             <Space direction="vertical">
               <div>
                 <Tag color={storageType === 'cloud' ? 'green' : 'blue'}>
-                  {storageType === 'cloud' ? '云存储' : '本地存储'}
+                  {storageType === 'cloud' ? t('download.cloud', '云存储') : t('download.local', '本地存储')}
                 </Tag>
                 {cloudDownloadUrl && (
-                  <Tag color="orange">云端备份可用</Tag>
+                  <Tag color="orange">{t('download.cloud.available', '云端备份可用')}</Tag>
                 )}
               </div>
               <div style={{ fontSize: 12, color: '#666' }}>
                 {storageType === 'cloud' 
-                  ? '视频已上传到云存储，下载速度更快' 
-                  : '视频存储在本地服务器'}
+                  ? t('download.cloud.desc', '视频已上传到云存储，下载速度更快') 
+                  : t('download.local.desc', '视频存储在本地服务器')}
               </div>
             </Space>
           </div>
@@ -167,7 +168,7 @@ function VideoDownload({ videoId, onNewVideo }) {
             onClick={() => handleDownload(false)}
             loading={downloading}
           >
-            下载视频
+            {t('export.download.btn', '下载视频')}
           </Button>
           
           {cloudDownloadUrl && (
@@ -179,7 +180,7 @@ function VideoDownload({ videoId, onNewVideo }) {
               loading={downloading}
               style={{ background: '#52c41a', borderColor: '#52c41a' }}
             >
-              云端下载
+              {t('download.cloud.btn', '云端下载')}
             </Button>
           )}
           
@@ -188,7 +189,7 @@ function VideoDownload({ videoId, onNewVideo }) {
             icon={<ShareAltOutlined />}
             onClick={handleShare}
           >
-            分享视频
+            {t('export.share.btn', '分享视频')}
           </Button>
           
           <Button
@@ -196,7 +197,7 @@ function VideoDownload({ videoId, onNewVideo }) {
             icon={<QrcodeOutlined />}
             onClick={() => setQrModalVisible(true)}
           >
-            二维码
+            {t('download.qr', '二维码')}
           </Button>
         </Space>
       </div>

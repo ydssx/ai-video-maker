@@ -28,7 +28,8 @@ import {
   ClockCircleOutlined,
   FileTextOutlined
 } from '@ant-design/icons';
-import axios from 'axios';
+import api from '../utils/api';
+import { t } from '../utils/i18n';
 import dayjs from 'dayjs';
 
 const { TextArea } = Input;
@@ -72,8 +73,8 @@ function ProjectManager({
   const loadProjects = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('/api/projects/list');
-      setProjects(response.data.projects || []);
+      const data = await api.get('/projects/list');
+      setProjects(data.projects || []);
     } catch (error) {
       console.error('加载项目失败:', error);
       message.error('加载项目列表失败');
@@ -106,7 +107,7 @@ function ProjectManager({
         updated_time: new Date().toISOString()
       };
 
-      const response = await axios.post('/api/projects/save', projectData);
+      const response = await api.post('/projects/save', projectData);
       
       message.success('项目保存成功');
       setSaveModalVisible(false);
@@ -114,7 +115,7 @@ function ProjectManager({
       loadProjects();
       
       // 通知父组件
-      onProjectSave && onProjectSave(response.data.project);
+      onProjectSave && onProjectSave(response.project);
       
     } catch (error) {
       console.error('保存项目失败:', error);
@@ -124,8 +125,8 @@ function ProjectManager({
 
   const loadProject = async (project) => {
     try {
-      const response = await axios.get(`/api/projects/${project.id}`);
-      const projectData = response.data.project;
+      const data = await api.get(`/projects/${project.id}`);
+      const projectData = data.project;
       
       message.success(`已加载项目：${projectData.name}`);
       
@@ -140,7 +141,7 @@ function ProjectManager({
 
   const deleteProject = async (projectId) => {
     try {
-      await axios.delete(`/api/projects/${projectId}`);
+      await api.delete(`/projects/${projectId}`);
       message.success('项目删除成功');
       loadProjects();
     } catch (error) {
@@ -159,7 +160,7 @@ function ProjectManager({
         updated_time: new Date().toISOString()
       };
       
-      await axios.post('/api/projects/save', duplicateData);
+      await api.post('/projects/save', duplicateData);
       message.success('项目复制成功');
       loadProjects();
     } catch (error) {
@@ -183,7 +184,7 @@ function ProjectManager({
         updated_time: new Date().toISOString()
       };
 
-      await axios.put(`/api/projects/${currentEditProject.id}`, updateData);
+      await api.put(`/projects/${currentEditProject.id}`, updateData);
       
       message.success('项目信息更新成功');
       setEditModalVisible(false);
@@ -316,7 +317,7 @@ function ProjectManager({
           </Col>
           <Col span={6}>
             <Input.Search
-              placeholder="搜索项目..."
+              placeholder={t('project.search.placeholder', '搜索项目...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               size="small"
