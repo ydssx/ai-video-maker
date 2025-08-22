@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-3.5-turbo"
     openai_max_tokens: int = 1500
     openai_temperature: float = 0.7
+    
+    # Gemini API配置
+    gemini_api_key: str = ""
 
     # Unsplash配置
     unsplash_access_key: str = ""

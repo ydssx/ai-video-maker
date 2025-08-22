@@ -6,8 +6,8 @@
 import os
 import logging
 from typing import Union
-from src.services.database_service import DatabaseService
 from src.services.mysql_database_service import MySQLDatabaseService
+from src.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class DatabaseFactory:
     """数据库服务工厂"""
     
     @staticmethod
-    def create_database_service(database_url: str = None) -> Union[DatabaseService, MySQLDatabaseService]:
+    def create_database_service(database_url: str = None) -> Union[ MySQLDatabaseService]:
         """
         根据数据库URL创建相应的数据库服务
         
@@ -106,7 +106,7 @@ class DatabaseFactory:
             return False
 
 # 创建全局数据库服务实例
-db_service = DatabaseFactory.create_database_service()
+db_service = DatabaseFactory.create_database_service(settings.get_mysql_url())
 
 def get_db_service():
     """获取数据库服务实例"""

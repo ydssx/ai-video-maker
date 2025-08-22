@@ -11,7 +11,7 @@ from sqlalchemy import Column, DateTime, Enum as SQLEnum, ForeignKey, Integer, S
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
-from db.models.base import BaseModel
+from .base import BaseModel
 
 
 class VideoStatus(str, Enum):
@@ -31,7 +31,7 @@ class VideoQuality(str, Enum):
     ULTRA_HD = "4k"
 
 
-class Video(BaseModel, BaseModel):
+class Video(BaseModel):
     """
     视频模型
     
@@ -53,8 +53,8 @@ class Video(BaseModel, BaseModel):
     file_size = Column(Integer, nullable=True)  # 文件大小（字节）
     thumbnail_path = Column(String(512), nullable=True)
     
-    # 视频元数据
-    metadata = Column(JSONB, default=dict, nullable=False)
+    # 视频元数据（避免使用 SQLAlchemy 保留名 metadata）
+    metadata_ = Column("metadata", JSONB, default=dict, nullable=False)
     
     # 关系
     project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
@@ -125,8 +125,8 @@ class Video(BaseModel, BaseModel):
             error_message: 错误信息
         """
         self.status = VideoStatus.FAILED
-        self.metadata = {
-            **self.metadata,
+        self.metadata_ = {
+            **self.metadata_,
             "error": error_message,
             "failed_at": datetime.utcnow().isoformat()
         }

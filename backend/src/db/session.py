@@ -7,11 +7,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from core.config import settings
+from src.core.config import settings
 
 # 创建SQLAlchemy引擎
 engine = create_engine(
-    settings.SQLALCHEMY_DATABASE_URI,
+    settings.get_mysql_url(),
     pool_pre_ping=True,  # 在连接前检查连接是否有效
     pool_recycle=3600,   # 连接在连接池中的最大空闲时间（秒）
 )

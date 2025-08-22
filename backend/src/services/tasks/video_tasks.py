@@ -1,10 +1,12 @@
 from typing import Dict
 
 from src.services.task_queue import celery_app
-from src.services.database_service import db_service
+from database_factory import get_db_service
 from src.services.video_service import video_service
 # 注意：当前任务实现未直接使用 video_service；后续迭代可切换到真实渲染
 
+
+db_service = get_db_service()
 
 @celery_app.task(name="video.create", bind=True)
 def create_video_task(self, video_id: str, script_data: Dict, config: Dict) -> Dict:

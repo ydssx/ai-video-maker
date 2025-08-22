@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, EmailStr, Field, validator
 
-from core.validators import validate_password
+from src.core.validators import validate_password
 
 
 # 基础属性
@@ -16,7 +16,6 @@ class UserBase(BaseModel):
     """用户基础模型"""
     username: str = Field(..., min_length=3, max_length=50, description="用户名")
     email: Optional[EmailStr] = Field(None, description="电子邮箱")
-    full_name: Optional[str] = Field(None, max_length=100, description="全名")
     is_active: bool = Field(True, description="是否激活")
     is_superuser: bool = Field(False, description="是否超级用户")
     
@@ -25,7 +24,6 @@ class UserBase(BaseModel):
             "example": {
                 "username": "johndoe",
                 "email": "johndoe@example.com",
-                "full_name": "John Doe",
                 "is_active": True,
                 "is_superuser": False,
             }

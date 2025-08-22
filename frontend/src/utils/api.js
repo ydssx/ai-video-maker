@@ -52,6 +52,8 @@ api.interceptors.response.use(
 
 		const { response } = error;
 		let errorMessage = '请求失败，请稍后重试';
+		const urlStr = (error.config?.url || '').toString();
+		const isAuthRequest = urlStr.includes('/users/login') || urlStr.includes('/users/register');
 		
 		if (response) {
 			// 处理HTTP错误状态码
@@ -60,10 +62,14 @@ api.interceptors.response.use(
 					errorMessage = response.data?.message || '请求参数错误';
 					break;
 				case 401:
-					// 未授权，清除token并跳转到登录页
+					// 未授权，清除token；避免在登录/注册页或登录接口时触发重定向导致刷新循环
 					localStorage.removeItem('token');
 					localStorage.removeItem('user');
-					window.location.href = '/login';
+					const currentPath = window.location.pathname;
+					const isAuthPage = currentPath === '/login' || currentPath === '/register';
+					if (!isAuthPage && !isAuthRequest) {
+						window.location.href = '/login';
+					}
 					errorMessage = '登录已过期，请重新登录';
 					break;
 				case 403:
@@ -84,7 +90,10 @@ api.interceptors.response.use(
 			errorMessage = '网络错误，请检查网络连接';
 		}
 
-		message.error(errorMessage);
+		// 认证请求交由页面自行提示，避免重复弹窗
+		if (!isAuthRequest) {
+			message.error(errorMessage);
+		}
 		return Promise.reject(error);
 	}
 );

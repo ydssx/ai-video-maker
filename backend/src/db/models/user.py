@@ -6,14 +6,13 @@
 from datetime import datetime
 from typing import List, Optional
 
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import relationship
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text, JSON
+from sqlalchemy.orm import relationship, scoped_session
 
-from db.models.base import BaseModel
+from .base import BaseModel
 
 
-class User(BaseModel, BaseModel):
+class User(BaseModel):
     """
     用户模型
     
@@ -29,14 +28,15 @@ class User(BaseModel, BaseModel):
     # 用户状态
     is_active = Column(Boolean(), default=True)
     is_superuser = Column(Boolean(), default=False)
+    scopes = Column(Text)
     
     # 个人信息
-    full_name = Column(String(100), nullable=True)
-    avatar = Column(String(255), nullable=True)
-    bio = Column(Text, nullable=True)
+    # full_name = Column(String(100), nullable=True)
+    # avatar = Column(String(255), nullable=True)
+    # bio = Column(Text, nullable=True)
     
     # 设置和首选项
-    preferences = Column(JSONB, default=dict, nullable=False)
+    preferences = Column(JSON, default=dict, nullable=False)
     
     # 关系
     projects = relationship("Project", back_populates="owner", cascade="all, delete-orphan")

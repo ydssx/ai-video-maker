@@ -9,7 +9,7 @@ from typing import Any, Dict
 from sqlalchemy import Column, DateTime, Integer
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
 
-from db.session import Base
+from src.db.session import Base
 
 
 @as_declarative()

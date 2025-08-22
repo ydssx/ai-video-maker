@@ -10,12 +10,13 @@ import logging
 from src.services.video_service import video_service
 from src.services.task_queue import is_celery_enabled, get_task_progress
 from src.services.tasks.video_tasks import create_video_task
-from src.services.database_service import db_service
+from database_factory import get_db_service
 from src.services.ai_service import ai_service
 from models import VideoRequest, VideoResponse
 from pydantic import BaseModel
 
 router = APIRouter()
+db_service = get_db_service()
 logger = logging.getLogger(__name__)
 
 # WebSocket连接管理

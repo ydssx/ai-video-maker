@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field, HttpUrl, validator
 
-from db.models.asset import AssetType, AssetStatus
+from src.db.models.asset import AssetType, AssetStatus
 
 
 class AssetBase(BaseModel):
@@ -39,7 +39,7 @@ class AssetBase(BaseModel):
                 "metadata": {
                     "width": 1920,
                     "height": 1080,
-                    "duration": null
+                    "duration": None
                 }
             }
         }

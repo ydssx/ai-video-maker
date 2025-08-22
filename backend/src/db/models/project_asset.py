@@ -7,10 +7,10 @@ from sqlalchemy import Column, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
-from db.models.base import BaseModel
+from .base import BaseModel
 
 
-class ProjectAsset(BaseModel, BaseModel):
+class ProjectAsset(BaseModel):
     """
     项目资源关联模型
     

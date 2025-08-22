@@ -74,6 +74,7 @@ const AuthPage = ({ initialTab = 'login' }) => {
           activeKey={activeTab} 
           onChange={handleTabChange}
           centered
+          destroyInactiveTabPane
           className="auth-tabs"
         >
           <TabPane tab={t('auth.login', '登录')} key="login">

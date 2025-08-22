@@ -11,7 +11,7 @@ from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, Enum
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
-from db.models.base import BaseModel
+from .base import BaseModel
 
 
 class ProjectStatus(str, Enum):
@@ -22,7 +22,7 @@ class ProjectStatus(str, Enum):
     ARCHIVED = "archived"
 
 
-class Project(BaseModel, BaseModel):
+class Project(BaseModel):
     """
     视频项目模型
     

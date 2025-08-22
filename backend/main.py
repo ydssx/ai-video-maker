@@ -55,9 +55,9 @@ app.add_middleware(
 )
 
 # 静态文件服务
-# app.mount("/assets", StaticFiles(directory="../assets"), name="assets")
-# app.mount("/output", StaticFiles(directory="../data/output"), name="output")
-# app.mount("/uploads", StaticFiles(directory="../data/uploads"), name="uploads")
+app.mount("/assets", StaticFiles(directory="../assets"), name="assets")
+app.mount("/output", StaticFiles(directory="../data/output"), name="output")
+app.mount("/uploads", StaticFiles(directory="../data/uploads"), name="uploads")
 
 app.include_router(api_router)
 # 路由

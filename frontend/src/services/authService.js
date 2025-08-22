@@ -7,9 +7,13 @@ const authService = {
     console.log('开始登录，凭据:', credentials);
     try {
       console.log('发送登录请求到 /users/login');
-      const response = await api.post('/users/login', {
-        username: credentials.username,
-        password: credentials.password,
+      const form = new URLSearchParams();
+      form.append('username', credentials.username);
+      form.append('password', credentials.password);
+      form.append('grant_type', 'password');
+      form.append('scope', '');
+      const response = await api.post('/users/login', form, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
       console.log('登录响应:', response);
       
@@ -25,9 +29,7 @@ const authService = {
       throw new Error('登录失败，请检查用户名或密码');
     } catch (error) {
       console.error('登录出错:', error);
-      const errorMessage = error.response?.data?.detail || '登录失败，请稍后重试';
-      console.error('错误信息:', errorMessage);
-      message.error(errorMessage);
+      // 由调用方（页面）统一提示，避免重复弹窗
       throw error;
     }
   },
@@ -44,8 +46,7 @@ const authService = {
       message.success('注册成功！请登录');
       return response;
     } catch (error) {
-      const errorMsg = error.response?.data?.detail || '注册失败，请稍后重试';
-      message.error(Array.isArray(errorMsg) ? errorMsg.join('\n') : errorMsg);
+      // 由调用方统一提示
       throw error;
     }
   },
@@ -57,8 +58,8 @@ const authService = {
       const token = localStorage.getItem('token');
       if (!token) return null;
       
-      // 简化版本：由于后端默认返回用户ID为1的用户
-      const response = await api.get('/users/profile');
+      // 使用后端提供的当前用户资料接口
+      const response = await api.get('/users/me');
       return response;
     } catch (error) {
       // 如果token无效，清除本地存储的token和用户信息

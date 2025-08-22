@@ -6,12 +6,13 @@ import os
 import psutil
 from datetime import datetime
 
-from src.services.database_service import db_service
+from database_factory import get_db_service
 from src.services.file_service import file_service
 from src.services.video_service import video_service
 from src.services.ai_service import ai_service
 
 router = APIRouter()
+db_service = get_db_service()
 logger = logging.getLogger(__name__)
 
 @router.get("/health")

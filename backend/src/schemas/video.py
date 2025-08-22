@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, HttpUrl, validator
 
-from db.models.video import VideoStatus, VideoQuality
+from src.db.models.video import VideoStatus, VideoQuality
 
 
 class VideoBase(BaseModel):

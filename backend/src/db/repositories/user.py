@@ -9,10 +9,10 @@ from fastapi import HTTPException, status
 from pydantic import EmailStr
 from sqlalchemy.orm import Session
 
-from core.security import get_password_hash, verify_password
-from db.models.user import User
-from db.repositories.base import CRUDBase
-from schemas.user import UserCreate, UserUpdate
+from src.core.security import get_password_hash, verify_password
+from src.db.models.user import User
+from src.db.repositories.base import CRUDBase
+from src.schemas.user import UserCreate, UserUpdate
 
 
 class UserRepository(CRUDBase[User, UserCreate, UserUpdate]):
@@ -81,10 +81,14 @@ class UserRepository(CRUDBase[User, UserCreate, UserUpdate]):
         # 创建用户
         user_data = obj_in.dict(exclude={"password"})
         hashed_password = get_password_hash(obj_in.password)
+        
+        # 确保 is_active 字段值是正确的（优先使用传入的值，默认为 True）
+        if 'is_active' not in user_data:
+            user_data['is_active'] = True
+            
         db_user = User(
             **user_data,
-            hashed_password=hashed_password,
-            is_active=True,
+            hashed_password=hashed_password
         )
         db.add(db_user)
         db.commit()

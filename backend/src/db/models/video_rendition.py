@@ -10,7 +10,7 @@ from sqlalchemy import Column, Enum as SQLEnum, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
-from db.models.base import BaseModel
+from .base import BaseModel
 
 
 class RenditionStatus(str, Enum):
@@ -21,7 +21,7 @@ class RenditionStatus(str, Enum):
     FAILED = "failed"
 
 
-class VideoRendition(BaseModel, BaseModel):
+class VideoRendition(BaseModel):
     """
     视频转码版本模型
     
@@ -43,8 +43,8 @@ class VideoRendition(BaseModel, BaseModel):
     file_size = Column(Integer, nullable=True)  # 文件大小（字节）
     duration = Column(Integer, nullable=True)  # 视频时长（秒）
     
-    # 元数据
-    metadata = Column(JSONB, default=dict, nullable=False)
+    # 元数据（避免使用 SQLAlchemy 保留名 metadata）
+    metadata_ = Column("metadata", JSONB, default=dict, nullable=False)
     
     # 关系
     video = relationship("Video", back_populates="renditions")
@@ -93,8 +93,8 @@ class VideoRendition(BaseModel, BaseModel):
             error_message: 错误信息
         """
         self.status = RenditionStatus.FAILED
-        self.metadata = {
-            **self.metadata,
+        self.metadata_ = {
+            **self.metadata_,
             "error": error_message,
             "failed_at": self.updated_at.isoformat()
         }

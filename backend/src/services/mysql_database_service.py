@@ -3,17 +3,17 @@ MySQL数据库服务
 使用SQLAlchemy ORM提供MySQL支持
 """
 
-import os
+import os  # noqa: F401
 import json
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 from contextlib import contextmanager
-from sqlalchemy import create_engine, Column, Integer, String, Text, Float, DateTime, ForeignKey, MetaData, text
+from sqlalchemy import create_engine, Column, Integer, String, Text, Float, DateTime, ForeignKey, MetaData, text, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
 from sqlalchemy.dialects.mysql import LONGTEXT
-import pymysql
+# import pymysql  # 仅用于外部脚本连接验证，此处不直接使用
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,10 @@ class User(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(50), unique=True, nullable=False)
     email = Column(String(100))
+    hashed_password = Column(String(255))
+    is_active = Column(Boolean, default=True)
+    is_superuser = Column(Boolean, default=False)
+    scopes = Column(LONGTEXT, default='[]')
     created_at = Column(DateTime, default=datetime.utcnow)
     last_login = Column(DateTime)
     settings = Column(LONGTEXT, default='{}')
@@ -152,10 +156,37 @@ class MySQLDatabaseService:
         try:
             # 创建所有表
             Base.metadata.create_all(bind=self.engine)
+            # 迁移：为既有 users 表补充缺失列
+            self._migrate_users_table()
             logger.info("MySQL数据库表初始化完成")
         except Exception as e:
             logger.error(f"数据库表初始化失败: {str(e)}")
             raise
+
+    def _migrate_users_table(self):
+        """确保 users 表包含新列"""
+        try:
+            with self.engine.connect() as conn:
+                result = conn.execute(text(
+                    """
+                    SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME='users'
+                    """
+                ))
+                existing = {row[0] for row in result}
+                alter_stmts = []
+                if 'hashed_password' not in existing:
+                    alter_stmts.append("ALTER TABLE users ADD COLUMN hashed_password VARCHAR(255) NULL")
+                if 'is_active' not in existing:
+                    alter_stmts.append("ALTER TABLE users ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1")
+                if 'is_superuser' not in existing:
+                    alter_stmts.append("ALTER TABLE users ADD COLUMN is_superuser TINYINT(1) NOT NULL DEFAULT 0")
+                if 'scopes' not in existing:
+                    alter_stmts.append("ALTER TABLE users ADD COLUMN scopes LONGTEXT NULL")
+                for stmt in alter_stmts:
+                    conn.execute(text(stmt))
+        except Exception as e:
+            logger.warning(f"用户表迁移检查失败: {str(e)}")
     
     @contextmanager
     def get_session(self) -> Session:
@@ -172,10 +203,18 @@ class MySQLDatabaseService:
             session.close()
     
     # 用户管理
-    def create_user(self, username: str, email: str = None) -> int:
+    def create_user(self, username: str, email: str = None, hashed_password: str = None, 
+                    is_active: bool = True, is_superuser: bool = False, scopes: list | None = None) -> int:
         """创建用户"""
         with self.get_session() as session:
-            user = User(username=username, email=email)
+            user = User(
+                username=username,
+                email=email,
+                hashed_password=hashed_password,
+                is_active=is_active,
+                is_superuser=is_superuser,
+                scopes=json.dumps(scopes or [])
+            )
             session.add(user)
             session.flush()  # 获取ID
             return user.id
@@ -189,6 +228,10 @@ class MySQLDatabaseService:
                     'id': user.id,
                     'username': user.username,
                     'email': user.email,
+                    'hashed_password': user.hashed_password,
+                    'is_active': bool(user.is_active),
+                    'is_superuser': bool(user.is_superuser),
+                    'scopes': json.loads(user.scopes) if user.scopes else [],
                     'created_at': user.created_at,
                     'last_login': user.last_login,
                     'settings': json.loads(user.settings) if user.settings else {},
@@ -205,6 +248,10 @@ class MySQLDatabaseService:
                     'id': user.id,
                     'username': user.username,
                     'email': user.email,
+                    'hashed_password': user.hashed_password,
+                    'is_active': bool(user.is_active),
+                    'is_superuser': bool(user.is_superuser),
+                    'scopes': json.loads(user.scopes) if user.scopes else [],
                     'created_at': user.created_at,
                     'last_login': user.last_login,
                     'settings': json.loads(user.settings) if user.settings else {},
@@ -222,6 +269,8 @@ class MySQLDatabaseService:
             for key, value in kwargs.items():
                 if hasattr(user, key):
                     if key in ['settings', 'quota_data'] and isinstance(value, dict):
+                        value = json.dumps(value)
+                    if key == 'scopes' and isinstance(value, list):
                         value = json.dumps(value)
                     setattr(user, key, value)
             

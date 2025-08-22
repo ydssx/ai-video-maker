@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Card, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../services/api';
+import authService from '../services/authService';
 import { useAppContext } from '../contexts/AppContext';
 
 const LoginPage = () => {
@@ -14,11 +14,9 @@ const LoginPage = () => {
     console.log('开始登录，表单数据:', values);
     setLoading(true);
     try {
-      const response = await login(values);
-      console.log('登录API响应:', response);
-      const { access_token, user } = response.data;
+      const { token, user } = await authService.login(values);
+      console.log('登录成功 Token:', token);
       
-      localStorage.setItem('token', access_token);
       actions.setUser(user);
       actions.setIsAuthenticated(true);
       

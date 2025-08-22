@@ -11,7 +11,7 @@ from sqlalchemy import Column, DateTime, Enum as SQLEnum, ForeignKey, Integer, S
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
-from db.models.base import BaseModel
+from src.db.models.base import BaseModel
 
 
 class AssetType(str, Enum):
@@ -31,7 +31,7 @@ class AssetStatus(str, Enum):
     ERROR = "error"
 
 
-class Asset(BaseModel, BaseModel):
+class Asset(BaseModel):
     """
     资源模型
     

@@ -32,9 +32,9 @@ def validate_password(password: str) -> str:
         raise ValueError("密码必须包含至少一个字母")
     
     # 检查是否包含特殊字符
-    special_chars = r'[!@#$%^&*(),.?":{}|<>]'
-    if not re.search(special_chars, password):
-        raise ValueError("密码必须包含至少一个特殊字符")
+    # special_chars = r'[!@#$%^&*(),.?":{}|<>]'
+    # if not re.search(special_chars, password):
+    #     raise ValueError("密码必须包含至少一个特殊字符")
     
     return password
 

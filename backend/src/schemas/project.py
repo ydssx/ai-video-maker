@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field, validator
 
-from db.models.project import ProjectStatus
+from src.db.models.project import ProjectStatus
 
 
 class ProjectBase(BaseModel):
