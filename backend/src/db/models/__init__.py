@@ -11,6 +11,7 @@ from .asset import Asset, AssetType, AssetStatus
 from .project_asset import ProjectAsset
 from .video import Video, VideoStatus, VideoQuality
 from .video_rendition import VideoRendition, RenditionStatus
+from .stats import UserStats, UserQuota, SystemStats
 
 # 导出所有模型
 __all__ = [
@@ -18,6 +19,9 @@ __all__ = [
     'User',
     'Project',
     'ProjectStatus',
+    'UserStats',
+    'UserQuota',
+    'SystemStats',
     'Asset',
     'AssetType',
     'AssetStatus',

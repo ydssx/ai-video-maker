@@ -7,77 +7,83 @@ from typing import Generator
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt
+from jose import jwt, JWTError
+from loguru import logger
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from core.config import settings
-from core.security import ALGORITHM
-from db.session import SessionLocal
-from schemas.token import TokenPayload
+from src.core.config import settings
+from src.core.security import ALGORITHM
+from src.db.session import get_db
+from src.schemas.token import TokenPayload
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, SecurityScopes
+from src.schemas.user import UserInDB, TokenData
+from src.db.repositories.user import user_repo
 
-# OAuth2 密码授权流程
-reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/login/access-token"
+
+# OAuth2 方案
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="token",
+    scopes={
+        "user:read": "Read user information",
+        "user:write": "Modify user information",
+        "admin": "Admin access"
+    }
 )
 
-def get_db() -> Generator:
-    """
-    获取数据库会话
-    
-    Yields:
-        Session: SQLAlchemy 数据库会话
-    """
-    try:
-        db = SessionLocal()
-        yield db
-    finally:
-        db.close()
 
-# 示例：获取当前用户
-def get_current_user():
-    """
-    获取当前认证用户
+async def get_current_user(
+    security_scopes: SecurityScopes,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+) -> UserInDB:
+    """获取当前认证用户"""
+    if security_scopes.scopes:
+        authenticate_value = f'Bearer scope=\"{security_scopes.scope_str}\"'
+    else:
+        authenticate_value = "Bearer"
     
-    这是一个示例函数，需要根据实际认证系统实现
-    """
-    async def _get_current_user(
-        token: str = Depends(reusable_oauth2),
-        db: Session = Depends(get_db),
-    ):
-        try:
-            payload = jwt.decode(
-                token, settings.SECRET_KEY, algorithms=[ALGORITHM]
-            )
-            token_data = TokenPayload(**payload)
-        except (jwt.JWTError, ValidationError):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="无法验证凭据",
+        headers={"WWW-Authenticate": authenticate_value},
+    )
+    
+    try:
+        payload = jwt.decode(token, settings.secret_key, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_scopes = payload.get("scopes", [])
+        token_data = TokenData(scopes=token_scopes, username=username)
+    except JWTError as e:
+        logger.error(f"JWT 验证失败: {str(e)}")
+        raise credentials_exception
+    except ValidationError as e:
+        logger.error(f"Token 数据验证失败: {str(e)}")
+        raise credentials_exception
+    except Exception as e:
+        logger.error(f"未知的 Token 验证错误: {str(e)}")
+        raise credentials_exception
+    
+    try:
+        user = user_repo.get_by_username(db, username=token_data.username)
+        if user is None:
+            raise credentials_exception
+    except Exception as e:
+        logger.error(f"获取用户信息失败: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="无法获取用户信息"
+        )
+    
+    # 检查权限范围
+    for scope in security_scopes.scopes:
+        if scope not in token_data.scopes:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="无法验证凭据",
+                detail="权限不足",
+                headers={"WWW-Authenticate": authenticate_value},
             )
-        # 这里添加获取用户逻辑
-        # user = crud.user.get(db, id=token_data.sub)
-        # if not user:
-        #     raise HTTPException(status_code=404, detail="用户不存在")
-        # return user
-        return None
     
-    return _get_current_user
-
-# 示例：获取当前活跃用户
-def get_current_active_user():
-    """
-    获取当前活跃用户
-    
-    这是一个示例函数，需要根据实际认证系统实现
-    """
-    async def _get_current_active_user(
-        current_user = Depends(get_current_user()),
-    ):
-        # 这里添加用户状态检查逻辑
-        # if not crud.user.is_active(current_user):
-        #     raise HTTPException(status_code=400, detail="用户未激活")
-        # return current_user
-        return None
-    
-    return _get_current_active_user
+    return user

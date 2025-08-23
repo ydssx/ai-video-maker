@@ -88,11 +88,22 @@ class UserInDBBase(UserBase):
     class Config:
         orm_mode = True
 
+class UserInDB(UserBase):
+    id: int
+    hashed_password: str
+    is_active: bool = True
+    is_superuser: bool = False
+    created_at: datetime
+    last_login: Optional[datetime] = None
+    scopes: List[str] = []
 
-# 数据库中的用户模型（包含敏感信息）
-class UserInDB(UserInDBBase):
-    """数据库用户模型（包含敏感信息）"""
-    hashed_password: str = Field(..., description="哈希后的密码")
+    @validator('scopes', pre=True, always=True)
+    def set_scopes(cls, v):
+        return v or []
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+    scopes: List[str] = []
 
 
 # API响应中的用户模型

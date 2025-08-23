@@ -3,11 +3,10 @@
 
 包含用户相关的数据库模型。
 """
-from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text, JSON
-from sqlalchemy.orm import relationship, scoped_session
+from sqlalchemy import Boolean, Column, Integer, String, Text, JSON
+from sqlalchemy.orm import relationship
 
 from .base import BaseModel
 
@@ -41,6 +40,8 @@ class User(BaseModel):
     # 关系
     projects = relationship("Project", back_populates="owner", cascade="all, delete-orphan")
     assets = relationship("Asset", back_populates="owner", cascade="all, delete-orphan")
+    stats = relationship("UserStats", back_populates="user", cascade="all, delete-orphan")
+    quota = relationship("UserQuota", back_populates="user", uselist=False, cascade="all, delete-orphan")
     
     def __repr__(self) -> str:
         return f"<User(id={self.id}, username='{self.username}')>"

@@ -5,6 +5,7 @@
 """
 from datetime import datetime, timedelta
 from typing import Any, Optional, Union
+import secrets
 
 from jose import jwt
 from passlib.context import CryptContext
@@ -15,33 +16,7 @@ from .config import settings
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # JWT算法
-ALGORITHM = "HS256"
-
-
-def create_access_token(
-    subject: Union[str, Any], expires_delta: Optional[timedelta] = None
-) -> str:
-    """
-    创建访问令牌
-    
-    Args:
-        subject: 要编码的主题（通常是用户ID）
-        expires_delta: 令牌过期时间
-        
-    Returns:
-        str: JWT令牌
-    """
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
-        )
-    to_encode = {"exp": expire, "sub": str(subject)}
-    encoded_jwt = jwt.encode(
-        to_encode, settings.SECRET_KEY, algorithm=ALGORITHM
-    )
-    return encoded_jwt
+ALGORITHM = settings.algorithm
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -103,3 +78,56 @@ def verify_token(token: str) -> dict:
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+def create_access_token(
+    data: dict, 
+    expires_delta: Optional[timedelta] = None,
+    token_type: str = "access"
+) -> str:
+    """
+    创建JWT令牌
+    
+    Args:
+        data: 要编码的数据
+        expires_delta: 过期时间差
+        token_type: 令牌类型 (access/refresh)
+        
+    Returns:
+        str: 编码后的JWT令牌
+    """
+    to_encode = data.copy()
+    now = datetime.utcnow()
+    
+    # 设置过期时间
+    if expires_delta:
+        expire = now + expires_delta
+    else:
+        expire = now + timedelta(minutes=settings.access_token_expire_minutes)
+    
+    # 添加标准声明
+    to_encode.update({
+        "exp": expire,
+        "iat": now,
+        "type": token_type,
+        "jti": secrets.token_urlsafe(16)  # JWT ID
+    })
+    
+    # 生成令牌
+    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
+def create_refresh_token(data: dict) -> str:
+    """
+    创建刷新令牌
+
+    Args:
+        data: 要编码的数据
+
+    Returns:
+        str: 编码后的刷新令牌
+    """
+    expires_delta = timedelta(days=settings.refresh_token_expire_days)
+    return create_access_token(data, expires_delta=expires_delta, token_type="refresh")
+
