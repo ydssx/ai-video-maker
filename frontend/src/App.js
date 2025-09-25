@@ -137,7 +137,7 @@ const AppContent = () => {
         />
 
         {/* 主要内容区域 */}
-        <div className="main-content">
+        <div className="main-content fade-in-up">
           {!showAssetManager ? (
             <>
               {app.currentStep === 0 && (
@@ -156,6 +156,7 @@ const AppContent = () => {
                       showIcon
                       style={{ marginBottom: 16 }}
                       closable
+                      className="slide-in-right"
                     />
                   )}
                   <VideoPreview
@@ -166,7 +167,7 @@ const AppContent = () => {
               )}
             </>
           ) : (
-            <div className="asset-manager-content">
+            <div className="asset-manager-content slide-in-right">
               <div style={{ marginBottom: 16, textAlign: 'right' }}>
                 <Button onClick={() => setShowAssetManager(false)}>
                   返回制作
