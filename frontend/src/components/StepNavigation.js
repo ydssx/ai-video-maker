@@ -255,15 +255,20 @@ const StepNavigation = ({
   return (
     <div className="step-navigation-fixed">
       <div className="content-container">
-        <Card className="steps-card" style={{ margin: 0, borderRadius: 0, borderLeft: 'none', borderRight: 'none' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <Card className="steps-card" style={{ margin: 0, borderRadius: 0, borderLeft: 'none', borderRight: 'none', background: 'transparent', boxShadow: 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, marginRight: 16 }}>制作进度</h3>
+              <h3 style={{ margin: 0, marginRight: 20, color: '#2d3748', fontSize: '18px', fontWeight: '600' }}>制作进度</h3>
               <Progress 
                 percent={getProgressPercent()} 
                 size="small" 
                 style={{ width: 200 }}
                 format={(percent) => `${Math.round(percent / 25)}/4 步骤`}
+                strokeColor={{
+                  '0%': '#667eea',
+                  '100%': '#764ba2',
+                }}
+                trailColor="rgba(0, 0, 0, 0.06)"
               />
             </div>
             
@@ -273,6 +278,7 @@ const StepNavigation = ({
             current={app.currentStep} 
             size="small"
             style={{ marginBottom: 0 }}
+            className="custom-steps"
           >
             {steps.map((step, index) => (
               <Step
@@ -284,7 +290,8 @@ const StepNavigation = ({
                 onClick={() => isStepAccessible(index) && onStepChange(index)}
                 style={{ 
                   cursor: isStepAccessible(index) ? 'pointer' : 'default',
-                  opacity: isStepAccessible(index) ? 1 : 0.6
+                  opacity: isStepAccessible(index) ? 1 : 0.6,
+                  transition: 'all 0.3s ease'
                 }}
               />
             ))}
