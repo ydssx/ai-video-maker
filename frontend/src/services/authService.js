@@ -1,5 +1,4 @@
 import api from '../utils/api';
-import { message } from 'antd';
 
 const authService = {
   // 用户登录
@@ -43,7 +42,6 @@ const authService = {
         password: userData.password,
       });
       
-      message.success('注册成功！请登录');
       return response;
     } catch (error) {
       // 由调用方统一提示
@@ -100,11 +98,6 @@ const authService = {
   getAuthHeader() {
     const token = localStorage.getItem('token');
     return token ? { Authorization: `Bearer ${token}` } : {};
-  },
-
-  // 检查用户是否已登录
-  isAuthenticated() {
-    return !!localStorage.getItem('token');
   }
 };
 

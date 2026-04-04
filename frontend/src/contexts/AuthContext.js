@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
       message.success('登录成功！');
       return response.user;
     } catch (error) {
-      message.error(error.response?.data?.message || '登录失败，请检查用户名或密码');
+      message.error(error.response?.data?.detail || error.response?.data?.message || '登录失败，请检查用户名或密码');
       throw error;
     }
   };
@@ -55,8 +55,11 @@ export const AuthProvider = ({ children }) => {
       message.success('注册成功！请登录');
       return true;
     } catch (error) {
-      const errorMessage = error.response?.data?.message || '注册失败';
-      message.error(Array.isArray(errorMessage) ? errorMessage.join('\n') : errorMessage);
+      const errorDetail = error.response?.data?.detail || error.response?.data?.message || '注册失败';
+      const errorMessage = Array.isArray(errorDetail)
+        ? errorDetail.map(e => e.msg || e).join('; ')
+        : errorDetail;
+      message.error(errorMessage);
       throw error;
     }
   };
