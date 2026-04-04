@@ -58,9 +58,9 @@ api.interceptors.response.use(
 		if (response) {
 			// 处理HTTP错误状态码
 			switch (response.status) {
-				case 400:
-					errorMessage = response.data?.message || '请求参数错误';
-					break;
+			case 400:
+				errorMessage = response.data?.detail || response.data?.message || '请求参数错误';
+				break;
 				case 401:
 					// 未授权，清除token；避免在登录/注册页或登录接口时触发重定向导致刷新循环
 					localStorage.removeItem('token');
@@ -81,8 +81,8 @@ api.interceptors.response.use(
 				case 500:
 					errorMessage = '服务器内部错误';
 					break;
-				default:
-					errorMessage = response.data?.message || `请求失败: ${response.status}`;
+			default:
+				errorMessage = response.data?.detail || response.data?.message || `请求失败: ${response.status}`;
 			}
 		} else if (error.message?.includes('timeout')) {
 			errorMessage = '请求超时，请检查网络连接';

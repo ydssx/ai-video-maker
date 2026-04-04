@@ -6,8 +6,6 @@ import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import './AuthPage.css';
 
-const { TabPane } = Tabs;
-
 const AuthPage = ({ initialTab = 'login' }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [loading, setLoading] = useState(false);
@@ -74,176 +72,184 @@ const AuthPage = ({ initialTab = 'login' }) => {
           activeKey={activeTab} 
           onChange={handleTabChange}
           centered
-          destroyInactiveTabPane
+          destroyOnHide
           className="auth-tabs"
-        >
-          <TabPane tab={t('auth.login', '登录')} key="login">
-            <Form
-              form={form}
-              name="login"
-              onFinish={onFinish}
-              autoComplete="off"
-              layout="vertical"
-              className="auth-form"
-            >
-              <Form.Item
-                name="username"
-                rules={[{ required: true, message: t('auth.usernameOrEmail.required', '请输入用户名或邮箱') }]}
-              >
-                <Input 
-                  prefix={<UserOutlined />} 
-                  placeholder={t('auth.usernameOrEmail.placeholder', '用户名或邮箱')} 
-                  size="large"
-                />
-              </Form.Item>
-
-              <Form.Item
-                name="password"
-                rules={[{ required: true, message: t('auth.password.required', '请输入密码') }]}
-              >
-                <Input.Password 
-                  prefix={<LockOutlined />} 
-                  placeholder={t('auth.password.placeholder', '密码')} 
-                  size="large"
-                />
-              </Form.Item>
-
-              <div className="form-extra">
-                <Form.Item name="remember" valuePropName="checked" noStyle>
-                  <Checkbox>{t('auth.remember', '记住我')}</Checkbox>
-                </Form.Item>
-                <a className="forgot-password" href="/forgot-password">
-                  {t('auth.forgot', '忘记密码？')}
-                </a>
-              </div>
-
-              <Form.Item>
-                <Button 
-                  type="primary" 
-                  htmlType="submit" 
-                  loading={loading}
-                  size="large"
-                  block
+          items={[
+            {
+              key: 'login',
+              label: t('auth.login', '登录'),
+              children: (
+                <Form
+                  form={form}
+                  name="login"
+                  onFinish={onFinish}
+                  autoComplete="off"
+                  layout="vertical"
+                  className="auth-form"
                 >
-                  {t('auth.login', '登录')}
-                </Button>
-              </Form.Item>
-            </Form>
-          </TabPane>
+                  <Form.Item
+                    name="username"
+                    rules={[{ required: true, message: t('auth.usernameOrEmail.required', '请输入用户名或邮箱') }]}
+                  >
+                    <Input 
+                      prefix={<UserOutlined />} 
+                      placeholder={t('auth.usernameOrEmail.placeholder', '用户名或邮箱')} 
+                      size="large"
+                    />
+                  </Form.Item>
 
-          <TabPane tab={t('auth.register', '注册')} key="register">
-            <Form
-              form={form}
-              name="register"
-              onFinish={onFinish}
-              autoComplete="off"
-              layout="vertical"
-              className="auth-form"
-              scrollToFirstError
-            >
-              <Form.Item
-                name="username"
-                rules={[
-                  { required: true, message: t('auth.username.required', '请输入用户名') },
-                  { min: 4, message: t('auth.username.min', '用户名至少4个字符') },
-                  { max: 20, message: t('auth.username.max', '用户名不能超过20个字符') }
-                ]}
-              >
-                <Input 
-                  prefix={<UserOutlined />} 
-                  placeholder={t('auth.username.placeholder', '用户名')} 
-                  size="large"
-                />
-              </Form.Item>
+                  <Form.Item
+                    name="password"
+                    rules={[{ required: true, message: t('auth.password.required', '请输入密码') }]}
+                  >
+                    <Input.Password 
+                      prefix={<LockOutlined />} 
+                      placeholder={t('auth.password.placeholder', '密码')} 
+                      size="large"
+                    />
+                  </Form.Item>
 
-              <Form.Item
-                name="email"
-                rules={[
-                  { type: 'email', message: t('auth.email.invalid', '请输入有效的邮箱地址') },
-                  { required: true, message: t('auth.email.required', '请输入邮箱') }
-                ]}
-              >
-                <Input 
-                  prefix={<UserOutlined />} 
-                  placeholder={t('auth.email.placeholder', '邮箱')} 
-                  size="large"
-                />
-              </Form.Item>
+                  <div className="form-extra">
+                    <Form.Item name="remember" valuePropName="checked" noStyle>
+                      <Checkbox>{t('auth.remember', '记住我')}</Checkbox>
+                    </Form.Item>
+                    <a className="forgot-password" href="/forgot-password">
+                      {t('auth.forgot', '忘记密码？')}
+                    </a>
+                  </div>
 
-              <Form.Item
-                name="password"
-                rules={[
-                  { required: true, message: t('auth.password.required', '请输入密码') },
-                  { min: 8, message: t('auth.password.min', '密码至少8个字符') },
-                  {
-                    pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/,
-                    message: t('auth.password.pattern', '密码必须包含大小写字母和数字'),
-                  },
-                ]}
-                hasFeedback
-              >
-                <Input.Password 
-                  prefix={<LockOutlined />} 
-                  placeholder={t('auth.password.set', '设置密码')} 
-                  size="large"
-                />
-              </Form.Item>
-
-              <Form.Item
-                name="confirm"
-                dependencies={['password']}
-                hasFeedback
-                rules={[
-                  {
-                    required: true,
-                    message: t('auth.confirm.required', '请确认密码'),
-                  },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (!value || getFieldValue('password') === value) {
-                        return Promise.resolve();
-                      }
-                      return Promise.reject(new Error(t('auth.confirm.mismatch', '两次输入的密码不匹配')));
-                    },
-                  }),
-                ]}
-              >
-                <Input.Password 
-                  prefix={<LockOutlined />} 
-                  placeholder={t('auth.confirm.placeholder', '确认密码')} 
-                  size="large"
-                />
-              </Form.Item>
-
-              <Form.Item
-                name="agreement"
-                valuePropName="checked"
-                rules={[
-                  {
-                    validator: (_, value) =>
-                      value ? Promise.resolve() : Promise.reject(new Error(t('auth.agreement.required', '请阅读并同意用户协议'))),
-                  },
-                ]}
-              >
-                <Checkbox>
-                  {t('auth.agreement.prefix', '我已阅读并同意')} <a href="/terms">{t('auth.terms', '用户协议')}</a> {t('auth.and', '和')} <a href="/privacy">{t('auth.privacy', '隐私政策')}</a>
-                </Checkbox>
-              </Form.Item>
-
-              <Form.Item>
-                <Button 
-                  type="primary" 
-                  htmlType="submit" 
-                  loading={loading}
-                  size="large"
-                  block
+                  <Form.Item>
+                    <Button 
+                      type="primary" 
+                      htmlType="submit" 
+                      loading={loading}
+                      size="large"
+                      block
+                    >
+                      {t('auth.login', '登录')}
+                    </Button>
+                  </Form.Item>
+                </Form>
+              ),
+            },
+            {
+              key: 'register',
+              label: t('auth.register', '注册'),
+              children: (
+                <Form
+                  form={form}
+                  name="register"
+                  onFinish={onFinish}
+                  autoComplete="off"
+                  layout="vertical"
+                  className="auth-form"
+                  scrollToFirstError
                 >
-                  {t('auth.register', '注册')}
-                </Button>
-              </Form.Item>
-            </Form>
-          </TabPane>
-        </Tabs>
+                  <Form.Item
+                    name="username"
+                    rules={[
+                      { required: true, message: t('auth.username.required', '请输入用户名') },
+                      { min: 4, message: t('auth.username.min', '用户名至少4个字符') },
+                      { max: 20, message: t('auth.username.max', '用户名不能超过20个字符') }
+                    ]}
+                  >
+                    <Input 
+                      prefix={<UserOutlined />} 
+                      placeholder={t('auth.username.placeholder', '用户名')} 
+                      size="large"
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    name="email"
+                    rules={[
+                      { type: 'email', message: t('auth.email.invalid', '请输入有效的邮箱地址') },
+                      { required: true, message: t('auth.email.required', '请输入邮箱') }
+                    ]}
+                  >
+                    <Input 
+                      prefix={<UserOutlined />} 
+                      placeholder={t('auth.email.placeholder', '邮箱')} 
+                      size="large"
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    name="password"
+                    rules={[
+                      { required: true, message: t('auth.password.required', '请输入密码') },
+                      { min: 8, message: t('auth.password.min', '密码至少8个字符') },
+                      {
+                        pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/,
+                        message: t('auth.password.pattern', '密码必须包含大小写字母和数字'),
+                      },
+                    ]}
+                    hasFeedback
+                  >
+                    <Input.Password 
+                      prefix={<LockOutlined />} 
+                      placeholder={t('auth.password.set', '设置密码')} 
+                      size="large"
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    name="confirm"
+                    dependencies={['password']}
+                    hasFeedback
+                    rules={[
+                      {
+                        required: true,
+                        message: t('auth.confirm.required', '请确认密码'),
+                      },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          if (!value || getFieldValue('password') === value) {
+                            return Promise.resolve();
+                          }
+                          return Promise.reject(new Error(t('auth.confirm.mismatch', '两次输入的密码不匹配')));
+                        },
+                      }),
+                    ]}
+                  >
+                    <Input.Password 
+                      prefix={<LockOutlined />} 
+                      placeholder={t('auth.confirm.placeholder', '确认密码')} 
+                      size="large"
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    name="agreement"
+                    valuePropName="checked"
+                    rules={[
+                      {
+                        validator: (_, value) =>
+                          value ? Promise.resolve() : Promise.reject(new Error(t('auth.agreement.required', '请阅读并同意用户协议'))),
+                      },
+                    ]}
+                  >
+                    <Checkbox>
+                      {t('auth.agreement.prefix', '我已阅读并同意')} <a href="/terms">{t('auth.terms', '用户协议')}</a> {t('auth.and', '和')} <a href="/privacy">{t('auth.privacy', '隐私政策')}</a>
+                    </Checkbox>
+                  </Form.Item>
+
+                  <Form.Item>
+                    <Button 
+                      type="primary" 
+                      htmlType="submit" 
+                      loading={loading}
+                      size="large"
+                      block
+                    >
+                      {t('auth.register', '注册')}
+                    </Button>
+                  </Form.Item>
+                </Form>
+              ),
+            },
+          ]}
+        />
 
         <Divider>{t('auth.or', '或')}</Divider>
 
