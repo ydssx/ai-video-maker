@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Tabs, Form, Input, Button, Checkbox, Divider, message } from 'antd';
-import { UserOutlined, LockOutlined, MailOutlined, GoogleOutlined, GithubOutlined } from '@ant-design/icons';
+import { UserOutlined, LockOutlined, GoogleOutlined, GithubOutlined } from '@ant-design/icons';
 import { t } from '../../utils/i18n';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -267,9 +267,19 @@ const AuthPage = ({ initialTab = 'login' }) => {
       
       <div className="auth-footer">
         {activeTab === 'login' ? (
-          <span>{t('auth.footer.noAccount', '还没有账号？')}<a onClick={() => setActiveTab('register')}>{t('auth.footer.registerNow', '立即注册')}</a></span>
+          <span>
+            {t('auth.footer.noAccount', '还没有账号？')}
+            <button type="button" className="auth-inline-link" onClick={() => setActiveTab('register')}>
+              {t('auth.footer.registerNow', '立即注册')}
+            </button>
+          </span>
         ) : (
-          <span>{t('auth.footer.hasAccount', '已有账号？')}<a onClick={() => setActiveTab('login')}>{t('auth.footer.loginNow', '立即登录')}</a></span>
+          <span>
+            {t('auth.footer.hasAccount', '已有账号？')}
+            <button type="button" className="auth-inline-link" onClick={() => setActiveTab('login')}>
+              {t('auth.footer.loginNow', '立即登录')}
+            </button>
+          </span>
         )}
         {activeTab === 'login' && (
           <div style={{ marginTop: 8 }}>
