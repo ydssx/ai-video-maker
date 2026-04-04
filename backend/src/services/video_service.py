@@ -2,7 +2,7 @@ import os
 import asyncio
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Callable
+from typing import Dict, List, Optional, Tuple, Callable, Union
 import logging
 from datetime import datetime
 import json
@@ -10,15 +10,59 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 import subprocess
 
+import numpy as np
+
 # MoviePy imports
 from moviepy.editor import (
     VideoFileClip, ImageClip, TextClip, CompositeVideoClip,
-    AudioFileClip, concatenate_videoclips, ColorClip
+    AudioFileClip, concatenate_videoclips, ColorClip,
 )
 from moviepy.video.fx import resize, fadein, fadeout
-from moviepy.video.tools.drawing import color_gradient
+from moviepy.video.compositing.transitions import (
+    crossfadein,
+    crossfadeout,
+    slide_in,
+    slide_out,
+)
 
 logger = logging.getLogger(__name__)
+
+
+def _parse_css_color(value: Union[str, tuple, list]) -> Tuple[int, int, int]:
+    """将模板中的颜色转为 RGB 元组（0–255）。"""
+    if isinstance(value, str) and value.startswith("#") and len(value) == 7:
+        return (
+            int(value[1:3], 16),
+            int(value[3:5], 16),
+            int(value[5:7], 16),
+        )
+    if isinstance(value, (list, tuple)) and len(value) == 3:
+        return (int(value[0]), int(value[1]), int(value[2]))
+    if isinstance(value, str):
+        # 常见命名色兜底
+        named = {
+            "white": (255, 255, 255),
+            "black": (0, 0, 0),
+        }
+        if value.lower() in named:
+            return named[value.lower()]
+    return (30, 58, 138)
+
+
+def _linear_gradient_rgb_array(
+    width: int, height: int, top_rgb: Tuple[int, int, int], bottom_rgb: Tuple[int, int, int]
+) -> np.ndarray:
+    """竖直线性渐变，形状 (height, width, 3) uint8。"""
+    c0 = np.array(top_rgb, dtype=np.float32).reshape(1, 1, 3)
+    c1 = np.array(bottom_rgb, dtype=np.float32).reshape(1, 1, 3)
+    if height <= 1:
+        t = np.zeros((1, width, 1), dtype=np.float32)
+    else:
+        t = np.linspace(0.0, 1.0, height, dtype=np.float32).reshape(height, 1, 1)
+        t = np.broadcast_to(t, (height, width, 1))
+    blended = (1.0 - t) * c0 + t * c1
+    return np.clip(blended, 0, 255).astype(np.uint8)
+
 
 class VideoService:
     def __init__(self):
@@ -56,18 +100,6 @@ class VideoService:
             '4k': (3840, 2160)
         }
         
-        # 转场效果
-        self.transition_effects = {
-            'fade': self._apply_fade_transition,
-            'slide_left': self._apply_slide_transition,
-            'slide_right': self._apply_slide_transition,
-            'slide_up': self._apply_slide_transition,
-            'slide_down': self._apply_slide_transition,
-            'zoom_in': self._apply_zoom_transition,
-            'zoom_out': self._apply_zoom_transition,
-            'dissolve': self._apply_dissolve_transition
-        }
-    
     async def create_video(self, video_id: str, script_data: Dict, 
                           config: Dict, progress_callback: Optional[Callable] = None) -> Dict:
         """创建视频"""
@@ -110,7 +142,10 @@ class VideoService:
             if progress_callback:
                 await progress_callback(video_id, 90, "合并视频片段...")
             
-            final_video = concatenate_videoclips(final_clips, method="compose")
+            overlap = 0.5 if len(final_clips) > 1 else 0
+            final_video = concatenate_videoclips(
+                final_clips, method="compose", padding=-overlap
+            )
             
             # 添加音频
             if config.get('voice_config', {}).get('enabled', False):
@@ -206,9 +241,10 @@ class VideoService:
             background_color = template_style.get('background_color', '#1e3a8a')
             
             if isinstance(background_color, list) and len(background_color) == 2:
-                # 渐变背景
-                background = ColorClip(size=(width, height), color=background_color[0])
-                # TODO: 实现渐变效果
+                c_top = _parse_css_color(background_color[0])
+                c_bot = _parse_css_color(background_color[1])
+                frame = _linear_gradient_rgb_array(width, height, c_top, c_bot)
+                background = ImageClip(frame).set_duration(duration)
             else:
                 # 纯色背景
                 background = ColorClip(size=(width, height), color=background_color)
@@ -293,51 +329,69 @@ class VideoService:
         return templates.get(template_id, templates['default'])
     
     async def _apply_transitions(self, clips: List[VideoFileClip], scenes: List[Dict]) -> List[VideoFileClip]:
-        """应用转场效果"""
+        """应用转场效果（在拼接时使用负 padding 实现重叠交叉）。"""
         if len(clips) <= 1:
             return clips
-        
-        final_clips = [clips[0]]
-        
+
+        final_clips: List[VideoFileClip] = [clips[0]]
+        transition_duration = 0.5
+
         for i in range(1, len(clips)):
-            transition_type = scenes[i].get('transition', 'fade')
-            transition_duration = 0.5
-            
-            # 应用转场效果
-            if transition_type in self.transition_effects:
-                prev_clip = final_clips[-1]
-                curr_clip = clips[i]
-                
-                # 调整片段以支持转场
+            transition_type = scenes[i].get("transition", "fade")
+            prev_clip = final_clips[-1]
+            curr_clip = clips[i]
+
+            if transition_type == "fade":
+                prev_clip = crossfadeout(prev_clip, transition_duration)
+                curr_clip = crossfadein(curr_clip, transition_duration)
+            elif transition_type in (
+                "slide_left",
+                "slide_right",
+                "slide_up",
+                "slide_down",
+            ):
+                side_map = {
+                    "slide_left": ("right", "left"),
+                    "slide_right": ("left", "right"),
+                    "slide_up": ("bottom", "top"),
+                    "slide_down": ("top", "bottom"),
+                }
+                out_side, in_side = side_map[transition_type]
+                prev_clip = slide_out(prev_clip, transition_duration, out_side)
+                curr_clip = slide_in(curr_clip, transition_duration, in_side)
+            elif transition_type == "zoom_in":
+                def _scale_in(t: float) -> float:
+                    if t >= transition_duration:
+                        return 1.0
+                    return max(0.01, t / transition_duration)
+
+                curr_clip = curr_clip.fx(resize, lambda t: _scale_in(t)).fx(
+                    crossfadein, transition_duration
+                )
+                prev_clip = crossfadeout(prev_clip, transition_duration)
+            elif transition_type == "zoom_out":
+                def _scale_out(t: float) -> float:
+                    d = prev_clip.duration
+                    if t <= d - transition_duration:
+                        return 1.0
+                    u = (t - (d - transition_duration)) / transition_duration
+                    return max(0.01, 1.0 - u)
+
+                prev_clip = prev_clip.fx(resize, lambda t: _scale_out(t)).fx(
+                    crossfadeout, transition_duration
+                )
+                curr_clip = crossfadein(curr_clip, transition_duration)
+            elif transition_type == "dissolve":
+                prev_clip = crossfadeout(prev_clip, transition_duration)
+                curr_clip = crossfadein(curr_clip, transition_duration)
+            else:
                 prev_clip = prev_clip.fadeout(transition_duration)
                 curr_clip = curr_clip.fadein(transition_duration)
-                
-                final_clips[-1] = prev_clip
-                final_clips.append(curr_clip)
-            else:
-                final_clips.append(clips[i])
-        
+
+            final_clips[-1] = prev_clip
+            final_clips.append(curr_clip)
+
         return final_clips
-    
-    def _apply_fade_transition(self, clip1: VideoFileClip, clip2: VideoFileClip, duration: float):
-        """应用淡入淡出转场"""
-        clip1 = clip1.fadeout(duration)
-        clip2 = clip2.fadein(duration)
-        return clip1, clip2
-    
-    def _apply_slide_transition(self, clip1: VideoFileClip, clip2: VideoFileClip, duration: float):
-        """应用滑动转场"""
-        # TODO: 实现滑动转场效果
-        return self._apply_fade_transition(clip1, clip2, duration)
-    
-    def _apply_zoom_transition(self, clip1: VideoFileClip, clip2: VideoFileClip, duration: float):
-        """应用缩放转场"""
-        # TODO: 实现缩放转场效果
-        return self._apply_fade_transition(clip1, clip2, duration)
-    
-    def _apply_dissolve_transition(self, clip1: VideoFileClip, clip2: VideoFileClip, duration: float):
-        """应用溶解转场"""
-        return self._apply_fade_transition(clip1, clip2, duration)
     
     async def _add_audio(self, video: VideoFileClip, script_data: Dict, voice_config: Dict) -> VideoFileClip:
         """添加音频"""
