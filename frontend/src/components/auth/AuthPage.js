@@ -273,9 +273,19 @@ const AuthPage = ({ initialTab = 'login' }) => {
       
       <div className="auth-footer">
         {activeTab === 'login' ? (
-          <span>{t('auth.footer.noAccount', '还没有账号？')}<a onClick={() => setActiveTab('register')}>{t('auth.footer.registerNow', '立即注册')}</a></span>
+          <span>
+            {t('auth.footer.noAccount', '还没有账号？')}
+            <button type="button" className="auth-inline-link" onClick={() => setActiveTab('register')}>
+              {t('auth.footer.registerNow', '立即注册')}
+            </button>
+          </span>
         ) : (
-          <span>{t('auth.footer.hasAccount', '已有账号？')}<a onClick={() => setActiveTab('login')}>{t('auth.footer.loginNow', '立即登录')}</a></span>
+          <span>
+            {t('auth.footer.hasAccount', '已有账号？')}
+            <button type="button" className="auth-inline-link" onClick={() => setActiveTab('login')}>
+              {t('auth.footer.loginNow', '立即登录')}
+            </button>
+          </span>
         )}
         {activeTab === 'login' && (
           <div style={{ marginTop: 8 }}>

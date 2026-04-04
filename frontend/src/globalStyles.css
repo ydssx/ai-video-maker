@@ -1,0 +1,423 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
+
+/* AI Video Maker — global design system & layout */
+
+:root {
+  --avm-bg: #f4f6fb;
+  --avm-surface: #ffffff;
+  --avm-surface-muted: rgba(255, 255, 255, 0.72);
+  --avm-border: rgba(15, 23, 42, 0.08);
+  --avm-text: #0f172a;
+  --avm-text-secondary: #64748b;
+  --avm-accent: #4f46e5;
+  --avm-accent-2: #0ea5e9;
+  --avm-header-h: 56px;
+  --avm-sider-w: 220px;
+  --avm-radius: 12px;
+  --avm-radius-lg: 16px;
+  --avm-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 32px rgba(15, 23, 42, 0.08);
+  --avm-font: 'DM Sans', 'Plus Jakarta Sans', 'Noto Sans SC', system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--avm-font);
+  color: var(--avm-text);
+  background: var(--avm-bg);
+  background-image:
+    radial-gradient(ellipse 120% 80% at 0% -20%, rgba(79, 70, 229, 0.12), transparent 50%),
+    radial-gradient(ellipse 100% 60% at 100% 0%, rgba(14, 165, 233, 0.1), transparent 45%);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* —— App shell —— */
+.avm-app.ant-layout {
+  min-height: 100vh;
+  background: transparent;
+}
+
+.avm-header.ant-layout-header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  height: var(--avm-header-h);
+  line-height: var(--avm-header-h);
+  padding: 0 20px;
+  background: rgba(255, 255, 255, 0.78) !important;
+  backdrop-filter: blur(16px) saturate(1.4);
+  border-bottom: 1px solid var(--avm-border);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+}
+
+.avm-header-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.avm-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.avm-brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--avm-accent) 0%, var(--avm-accent-2) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 18px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+}
+
+.avm-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  line-height: 1.2;
+  min-width: 0;
+}
+
+.avm-brand-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--avm-text);
+  letter-spacing: -0.02em;
+}
+
+.avm-brand-sub {
+  margin: 0;
+  font-size: 12px;
+  color: var(--avm-text-secondary);
+  font-weight: 500;
+}
+
+.avm-header-actions.ant-space {
+  flex-shrink: 0;
+}
+
+.avm-header-actions .ant-btn-link {
+  color: var(--avm-text-secondary) !important;
+  font-weight: 500;
+}
+
+.avm-header-actions .ant-btn-link:hover {
+  color: var(--avm-accent) !important;
+  background: rgba(79, 70, 229, 0.06) !important;
+}
+
+.avm-body.ant-layout {
+  background: transparent;
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.avm-sider.ant-layout-sider {
+  background: transparent !important;
+}
+
+.avm-sider-inner {
+  position: sticky;
+  top: var(--avm-header-h);
+  height: calc(100vh - var(--avm-header-h));
+  padding: 16px 12px 24px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.avm-sider-card {
+  flex: 1;
+  background: var(--avm-surface-muted);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--avm-border);
+  border-radius: var(--avm-radius-lg);
+  padding: 8px;
+  box-shadow: var(--avm-shadow);
+}
+
+.avm-sider-card .ant-menu {
+  border-inline-end: none !important;
+  background: transparent !important;
+}
+
+.avm-sider-card .ant-menu-item {
+  border-radius: 10px !important;
+  margin: 4px 0 !important;
+  height: 44px !important;
+  line-height: 44px !important;
+  font-weight: 500;
+}
+
+.avm-sider-card .ant-menu-item-selected {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(14, 165, 233, 0.08)) !important;
+  color: var(--avm-accent) !important;
+}
+
+.avm-main-wrap {
+  padding: 16px 20px 32px 8px;
+  min-height: calc(100vh - var(--avm-header-h) - 52px);
+}
+
+@media (max-width: 991px) {
+  .avm-main-wrap {
+    padding: 12px 16px 24px;
+  }
+
+  .avm-sider-inner {
+    padding: 12px 16px;
+    height: auto;
+    position: relative;
+    top: 0;
+  }
+
+  .avm-sider-card {
+    margin-bottom: 12px;
+  }
+
+  .avm-sider-card .ant-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .avm-sider-card .ant-menu-item {
+    flex: 1 1 auto;
+    min-width: 100px;
+    justify-content: center;
+  }
+}
+
+.avm-panel {
+  background: var(--avm-surface);
+  border: 1px solid var(--avm-border);
+  border-radius: var(--avm-radius-lg);
+  box-shadow: var(--avm-shadow);
+  overflow: hidden;
+  min-height: 420px;
+}
+
+.avm-panel-body {
+  padding: 0;
+}
+
+.avm-panel-body .step-content,
+.avm-panel-body .asset-manager-content {
+  padding: 20px 24px 28px;
+}
+
+@media (max-width: 576px) {
+  .avm-panel-body .step-content,
+  .avm-panel-body .asset-manager-content {
+    padding: 16px;
+  }
+}
+
+.avm-footer.ant-layout-footer {
+  background: transparent;
+  color: var(--avm-text-secondary);
+  font-size: 13px;
+  padding: 16px 24px 28px;
+  text-align: center;
+}
+
+.avm-footer-hint {
+  margin-left: 8px;
+  color: #f59e0b;
+}
+
+/* Step navigation (child components) */
+.step-navigation-fixed {
+  position: sticky;
+  top: var(--avm-header-h);
+  z-index: 50;
+  background: rgba(244, 246, 251, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--avm-border);
+  margin: 0 0 16px;
+  border-radius: var(--avm-radius) var(--avm-radius) 0 0;
+}
+
+.step-navigation-fixed .content-container {
+  max-width: none;
+  margin: 0;
+  padding: 0 4px;
+}
+
+.step-navigation-fixed .steps-card.ant-card {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.custom-steps .ant-steps-item-process .ant-steps-item-icon {
+  background: linear-gradient(135deg, var(--avm-accent), var(--avm-accent-2)) !important;
+  border: none !important;
+}
+
+.custom-steps .ant-steps-item-finish .ant-steps-item-icon {
+  background: linear-gradient(135deg, #22c55e, #10b981) !important;
+  border: none !important;
+}
+
+.ant-steps-navigation .ant-steps-item:hover {
+  background-color: rgba(79, 70, 229, 0.06);
+}
+
+/* Template cards (TemplateSelector) */
+.template-card {
+  border-radius: var(--avm-radius);
+  border: 1px solid var(--avm-border) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.template-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--avm-shadow);
+}
+
+.template-card.template-selected {
+  border-color: var(--avm-accent) !important;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+.template-preview {
+  border-radius: 8px;
+}
+
+/* Video preview region */
+.video-preview {
+  background: transparent;
+}
+
+.video-player {
+  border-radius: var(--avm-radius);
+}
+
+/* Optimized script generator — soften old purple shell */
+.optimized-script-generator {
+  padding: 24px 20px 32px;
+  min-height: auto;
+}
+
+.optimized-script-generator::before {
+  display: none;
+}
+
+.optimized-script-generator .main-title {
+  background: linear-gradient(135deg, var(--avm-accent), var(--avm-accent-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.optimized-script-generator .main-content-card {
+  box-shadow: var(--avm-shadow) !important;
+  border: 1px solid var(--avm-border) !important;
+}
+
+.standalone-asset-manager .ant-card {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+.standalone-asset-manager .ant-card-head {
+  border-bottom: 1px solid var(--avm-border);
+  padding: 0 0 12px;
+  min-height: auto;
+}
+
+.standalone-asset-manager .ant-card-head-title {
+  font-size: 18px;
+  font-weight: 700;
+  padding: 0;
+}
+
+.standalone-asset-manager .ant-card-body {
+  padding: 16px 0 0;
+}
+
+/* Performance page inside app shell */
+.avm-app .performance-page {
+  min-height: auto;
+  background: transparent;
+}
+
+.avm-app .performance-page .page-header {
+  margin: 0 0 16px;
+  padding: 12px 0;
+  background: transparent;
+  border-bottom: 1px solid var(--avm-border);
+}
+
+.avm-app .performance-page .ant-layout-content {
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+/* Auth loading */
+.avm-route-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--avm-bg);
+}
+
+/* Utility classes used across components */
+.text-center {
+  text-align: center;
+}
+
+.mt-16 { margin-top: 16px; }
+.mt-20 { margin-top: 20px; }
+.mt-24 { margin-top: 24px; }
+.mt-40 { margin-top: 40px; }
+
+.mb-16 { margin-bottom: 16px; }
+.mb-20 { margin-bottom: 20px; }
+.mb-24 { margin-bottom: 24px; }
+
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.step-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .template-card,
+  .template-card:hover {
+    transition: none;
+    transform: none;
+  }
+}

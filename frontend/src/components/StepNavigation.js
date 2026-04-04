@@ -8,18 +8,12 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   ExclamationCircleOutlined,
-  FolderOutlined
 } from '@ant-design/icons';
 import { useAppContext } from '../contexts/AppContext';
 
 const { Step } = Steps;
 
-const StepNavigation = ({ 
-  onStepChange,
-  showProgress = true,
-  showQuickActions = true,
-  compact = false
-}) => {
+const StepNavigation = ({ onStepChange, compact = false }) => {
   const { state, actions } = useAppContext();
   const { app, project, preview } = state;
   
@@ -111,6 +105,8 @@ const StepNavigation = ({
         case 'video':
           message = '请先制作视频';
           break;
+        default:
+          break;
       }
       
       actions.addNotification(message, 'warning');
@@ -121,98 +117,6 @@ const StepNavigation = ({
     onStepChange && onStepChange(stepIndex);
   };
   
-  // 快捷操作按钮
-  const renderQuickActions = () => {
-    if (!showQuickActions) return null;
-    
-    const currentStep = app.currentStep;
-    const actions_list = [];
-    
-    // 根据当前步骤显示相关操作
-    switch (currentStep) {
-      case 0:
-        actions_list.push(
-          <Button key="templates" type="link" size="small">
-            查看模板
-          </Button>
-        );
-        break;
-        
-      case 1:
-        if (project.script) {
-          actions_list.push(
-            <Button key="preview" type="link" size="small">
-              快速预览
-            </Button>
-          );
-        }
-        break;
-        
-      case 2:
-        if (project.script) {
-          actions_list.push(
-            <Button key="settings" type="link" size="small">
-              导出设置
-            </Button>
-          );
-        }
-        break;
-        
-      case 3:
-        if (project.videoId) {
-          actions_list.push(
-            <Button key="share" type="link" size="small">
-              分享视频
-            </Button>
-          );
-        }
-        break;
-    }
-    
-    if (actions_list.length === 0) return null;
-    
-    return (
-      <div style={{ textAlign: 'center', marginTop: '12px' }}>
-        <Space size="small">
-          {actions_list}
-        </Space>
-      </div>
-    );
-  };
-  
-  // 进度信息
-  const renderProgressInfo = () => {
-    if (!showProgress) return null;
-    
-    const completedSteps = steps.filter(step => step.status === 'finish').length;
-    const totalSteps = steps.length;
-    const progressPercent = (completedSteps / totalSteps) * 100;
-    
-    return (
-      <div style={{ marginBottom: '16px', textAlign: 'center' }}>
-        <Space direction="vertical" size="small" style={{ width: '100%' }}>
-          <div style={{ color: '#666', fontSize: '12px' }}>
-            制作进度: {completedSteps}/{totalSteps} 步骤
-          </div>
-          
-          <Progress
-            percent={progressPercent}
-            size="small"
-            showInfo={false}
-            strokeColor="#1890ff"
-          />
-          
-          <Space size="small">
-            {project.script && <Tag color="green" size="small">✓ 脚本已生成</Tag>}
-            {project.videoId && <Tag color="blue" size="small">✓ 视频已制作</Tag>}
-            {project.isDirty && <Tag color="orange" size="small">● 未保存</Tag>}
-            {preview.status === 'generating' && <Tag color="processing" size="small">制作中...</Tag>}
-          </Space>
-        </Space>
-      </div>
-    );
-  };
-
   const getProgressPercent = () => {
     const completedSteps = steps.filter(step => step.status === 'finish').length;
     const totalSteps = steps.length;
@@ -257,21 +161,26 @@ const StepNavigation = ({
       <div className="content-container">
         <Card className="steps-card" style={{ margin: 0, borderRadius: 0, borderLeft: 'none', borderRight: 'none', background: 'transparent', boxShadow: 'none' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, marginRight: 20, color: '#2d3748', fontSize: '18px', fontWeight: '600' }}>制作进度</h3>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+              <h3 style={{ margin: 0, marginRight: 8, color: '#2d3748', fontSize: '18px', fontWeight: '600' }}>制作进度</h3>
               <Progress 
                 percent={getProgressPercent()} 
                 size="small" 
-                style={{ width: 200 }}
+                style={{ width: 200, minWidth: 120 }}
                 format={(percent) => `${Math.round(percent / 25)}/4 步骤`}
                 strokeColor={{
-                  '0%': '#667eea',
-                  '100%': '#764ba2',
+                  '0%': '#4f46e5',
+                  '100%': '#0ea5e9',
                 }}
                 trailColor="rgba(0, 0, 0, 0.06)"
               />
+              <Space size="small" wrap>
+                {project.script && <Tag color="green">脚本已生成</Tag>}
+                {project.videoId && <Tag color="blue">视频已制作</Tag>}
+                {project.isDirty && <Tag color="orange">未保存</Tag>}
+                {preview.status === 'generating' && <Tag color="processing">制作中</Tag>}
+              </Space>
             </div>
-            
           </div>
           
           <Steps 
@@ -287,7 +196,7 @@ const StepNavigation = ({
                 description={step.description}
                 icon={getStepStatusIcon(step, index)}
                 status={step.status}
-                onClick={() => isStepAccessible(index) && onStepChange(index)}
+                onClick={() => handleStepClick(index)}
                 style={{ 
                   cursor: isStepAccessible(index) ? 'pointer' : 'default',
                   opacity: isStepAccessible(index) ? 1 : 0.6,
