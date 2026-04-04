@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { Layout, Button, Alert, Drawer, Space, Badge, Menu, Dropdown, Tooltip } from 'antd';
+import { Layout, Button, Alert, Drawer, Space, Badge, Dropdown, Tooltip } from 'antd';
 import {
   UserOutlined,
   SettingOutlined,
@@ -214,18 +214,16 @@ const AppContent = () => {
               
               {/* 更多功能下拉菜单 */}
               <Dropdown
-                overlay={
-                  <Menu
-                    items={[
-                      { key: 'performance', label: t('header.performance'), icon: <DashboardOutlined />, onClick: () => setShowPerformance(!showPerformance) },
-                      { key: 'user', label: t('header.user'), icon: <UserOutlined />, onClick: () => setShowUserDashboard(true) },
-                      { key: 'settings', label: t('header.settings'), icon: <SettingOutlined /> },
-                      { key: 'help', label: t('header.help'), icon: <QuestionCircleOutlined /> },
-                      { type: 'divider' },
-                      { key: 'logout', label: t('header.logout'), icon: <LogoutOutlined />, onClick: logout }
-                    ]}
-                  />
-                }
+                menu={{
+                  items: [
+                    { key: 'performance', label: t('header.performance'), icon: <DashboardOutlined />, onClick: () => setShowPerformance(!showPerformance) },
+                    { key: 'user', label: t('header.user'), icon: <UserOutlined />, onClick: () => setShowUserDashboard(true) },
+                    { key: 'settings', label: t('header.settings'), icon: <SettingOutlined /> },
+                    { key: 'help', label: t('header.help'), icon: <QuestionCircleOutlined /> },
+                    { type: 'divider' },
+                    { key: 'logout', label: t('header.logout'), icon: <LogoutOutlined />, onClick: logout }
+                  ],
+                }}
                 placement="bottomRight"
               >
                 <Button type="link" style={{ color: 'white' }} icon={<MoreOutlined />}>
@@ -260,7 +258,7 @@ const AppContent = () => {
         width={480}
         onClose={() => setShowUserDashboard(false)}
         open={showUserDashboard}
-        bodyStyle={{ padding: '16px' }}
+        styles={{ body: { padding: '16px' } }}
       >
         <UserDashboard />
       </Drawer>
