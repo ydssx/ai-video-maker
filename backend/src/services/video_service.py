@@ -17,7 +17,9 @@ from moviepy.editor import (
     VideoFileClip, ImageClip, TextClip, CompositeVideoClip,
     AudioFileClip, concatenate_videoclips, ColorClip,
 )
-from moviepy.video.fx import resize, fadein, fadeout
+from moviepy.video.fx.fadein import fadein
+from moviepy.video.fx.fadeout import fadeout
+from moviepy.video.fx.resize import resize
 from moviepy.video.compositing.transitions import (
     crossfadein,
     crossfadeout,

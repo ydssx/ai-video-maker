@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 
 from src.services.task_queue import celery_app
 from database_factory import get_db_service
@@ -8,8 +8,8 @@ from src.services.video_service import video_service
 
 db_service = get_db_service()
 
-@celery_app.task(name="video.create", bind=True)
-def create_video_task(self, video_id: str, script_data: Dict, config: Dict) -> Dict:
+
+def _create_video_task_impl(self, video_id: str, script_data: Dict, config: Dict) -> Dict:
     """Celery 任务：创建视频。
 
     注意：Celery 任务函数是同步的；内部如需调用异步逻辑，
@@ -57,4 +57,9 @@ def create_video_task(self, video_id: str, script_data: Dict, config: Dict) -> D
         "duration": result.get("duration"),
     }
 
+
+# 未启用 Celery 时不注册任务，避免导入阶段 AttributeError
+create_video_task: Optional[object] = None
+if celery_app is not None:
+    create_video_task = celery_app.task(name="video.create", bind=True)(_create_video_task_impl)
 
