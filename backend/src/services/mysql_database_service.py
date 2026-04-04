@@ -473,7 +473,39 @@ class MySQLDatabaseService:
                     'created_at': video.created_at
                 }
             return None
-    
+
+    def list_videos_by_user(
+        self, user_id: int, limit: int = 20, offset: int = 0
+    ) -> tuple[List[Dict], int]:
+        """按用户分页查询视频列表，返回 (列表, 总条数)"""
+        with self.get_session() as session:
+            q = session.query(Video).filter(Video.user_id == user_id)
+            total = q.count()
+            rows = (
+                q.order_by(Video.created_at.desc())
+                .limit(limit)
+                .offset(offset)
+                .all()
+            )
+            items = []
+            for video in rows:
+                items.append(
+                    {
+                        "id": video.id,
+                        "project_id": video.project_id,
+                        "user_id": video.user_id,
+                        "title": video.title,
+                        "duration": video.duration,
+                        "file_path": video.file_path,
+                        "thumbnail_path": video.thumbnail_path,
+                        "status": video.status,
+                        "created_at": video.created_at.isoformat()
+                        if video.created_at
+                        else None,
+                    }
+                )
+            return items, total
+
     # 素材管理
     def create_asset(self, asset_id: str, user_id: int, filename: str, 
                     file_path: str, file_type: str, file_size: int,

@@ -343,19 +343,21 @@ async def cancel_video_processing(video_id: str):
 async def list_videos(user_id: int = 1, limit: int = 20, offset: int = 0):
     """获取视频列表"""
     try:
-        # 这里应该从认证中获取用户ID，暂时使用默认值
-        videos = []
-        
-        # 从数据库获取视频列表
-        # TODO: 实现数据库查询
-        
+        limit = max(1, min(limit, 100))
+        offset = max(0, offset)
+        list_fn = getattr(db_service, "list_videos_by_user", None)
+        if callable(list_fn):
+            videos, total = list_fn(user_id, limit=limit, offset=offset)
+        else:
+            videos, total = [], 0
+
         return {
             "videos": videos,
-            "total": len(videos),
+            "total": total,
             "limit": limit,
-            "offset": offset
+            "offset": offset,
         }
-        
+
     except Exception as e:
         logger.error(f"获取视频列表失败: {str(e)}")
         raise HTTPException(status_code=500, detail="获取列表失败")
