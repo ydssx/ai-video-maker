@@ -72,7 +72,7 @@ const AuthPage = ({ initialTab = 'login' }) => {
           activeKey={activeTab} 
           onChange={handleTabChange}
           centered
-          destroyOnHide
+          destroyOnHidden
           className="auth-tabs"
           items={[
             {

@@ -72,7 +72,7 @@ function VideoPreview({ script, onVideoCreated }) {
 
   const fetchTemplates = async () => {
     try {
-      const data = await api.get('/video/templates');
+      const data = (await api.get('/video/templates')) as { templates?: unknown[] };
       setTemplates(data.templates);
     } catch (error) {
       console.error('获取模板失败:', error);
@@ -81,7 +81,7 @@ function VideoPreview({ script, onVideoCreated }) {
 
   const checkVideoStatus = async () => {
     try {
-      const data = await api.get(`/video/status/${videoId}`);
+      const data = (await api.get(`/video/status/${videoId}`)) as { status?: string };
       setVideoStatus(data.status);
 
       if (data.status === 'completed') {
@@ -206,7 +206,7 @@ function VideoPreview({ script, onVideoCreated }) {
     setProgress(10);
 
     try {
-      const response = await api.post('/video/create', {
+      const response = (await api.post('/video/create', {
         script: script,
         template_id: selectedTemplate,
         voice_config: voiceConfig,
@@ -214,7 +214,7 @@ function VideoPreview({ script, onVideoCreated }) {
         audio_config: audioConfig,
         transition_config: transitionConfig,
         export_config: exportConfig
-      });
+      })) as { video_id?: string };
 
       setVideoId(response.video_id);
       setVideoStatus('processing');

@@ -121,6 +121,7 @@ function VideoTimeline({ script, onSceneChange, currentScene = 0 }) {
   }, [isDragging, getCurrentSceneIndex, onSceneChange]);
 
   const handleSliderChange = useCallback((value) => {
+    setIsDragging(true);
     setCurrentTime(value);
   }, []);
 
@@ -129,10 +130,6 @@ function VideoTimeline({ script, onSceneChange, currentScene = 0 }) {
     const newSceneIndex = getCurrentSceneIndex(value);
     onSceneChange(newSceneIndex);
   }, [getCurrentSceneIndex, onSceneChange]);
-
-  const handleSliderBeforeChange = useCallback(() => {
-    setIsDragging(true);
-  }, []);
 
   const handlePrevScene = useCallback(() => {
     const newScene = Math.max(0, currentScene - 1);
@@ -181,7 +178,7 @@ function VideoTimeline({ script, onSceneChange, currentScene = 0 }) {
           }}
         >
           <span>场景 {index + 1}</span>
-          <Tag size="small">{formatTime(scene.duration)}</Tag>
+          <Tag>{formatTime(scene.duration)}</Tag>
         </Menu.Item>
       ))}
     </Menu>
@@ -189,7 +186,7 @@ function VideoTimeline({ script, onSceneChange, currentScene = 0 }) {
 
   if (!script || !script.scenes) {
     return (
-      <Card title="视频时间轴" size="small">
+      <Card title="视频时间轴">
         <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
           暂无脚本内容
         </div>
@@ -201,7 +198,7 @@ function VideoTimeline({ script, onSceneChange, currentScene = 0 }) {
   const currentSceneInfo = scenes[currentScene] || scenes[0];
 
   return (
-    <Card title="视频时间轴" size="small">
+    <Card title="视频时间轴">
       {/* 播放控制 */}
       <div style={{ marginBottom: 16 }}>
         <Space>
@@ -257,7 +254,6 @@ function VideoTimeline({ script, onSceneChange, currentScene = 0 }) {
           value={currentTime}
           onChange={handleSliderChange}
           onAfterChange={handleSliderAfterChange}
-          onBeforeChange={handleSliderBeforeChange}
           step={0.1}
           tooltip={{
             formatter: formatTime
@@ -314,7 +310,7 @@ function VideoTimeline({ script, onSceneChange, currentScene = 0 }) {
         </div>
         <Progress
           percent={((currentScene + 1) / script.scenes.length) * 100}
-          size="small"
+         
           showInfo={false}
         />
       </div>
@@ -355,7 +351,7 @@ function VideoTimeline({ script, onSceneChange, currentScene = 0 }) {
               aria-label={`跳转到场景 ${index + 1}`}
             >
               <span>场景 {index + 1}</span>
-              <Tag size="small">{formatTime(scene.duration)}</Tag>
+              <Tag>{formatTime(scene.duration)}</Tag>
             </div>
           ))}
         </div>

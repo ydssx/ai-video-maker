@@ -165,7 +165,7 @@ function AssetManager({ onAssetSelect }) {
     <Col span={6} key={asset.id}>
       <Card
         hoverable
-        size="small"
+       
         cover={
           type === 'images' ? (
             <div style={{ height: 120, overflow: 'hidden' }}>
@@ -228,7 +228,7 @@ function AssetManager({ onAssetSelect }) {
               </div>
               <div>
                 {asset.tags.map(tag => (
-                  <Tag key={tag} size="small" color="blue">
+                  <Tag key={tag} color="blue">
                     {tag}
                   </Tag>
                 ))}
@@ -269,7 +269,7 @@ function AssetManager({ onAssetSelect }) {
 
   return (
     <div>
-      <Card title="素材管理" size="small">
+      <Card title="素材管理">
         <div style={{ marginBottom: 16 }}>
           <Row gutter={16} align="middle">
             <Col span={8}>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Button, Space, Tooltip, Divider, Typography } from 'antd';
+import { Card, Button, Space, Tooltip, Divider, Typography, type ButtonProps } from 'antd';
 import {
   SaveOutlined,
   UndoOutlined,
@@ -19,17 +19,34 @@ import { useAppContext } from '../contexts/AppContext';
 
 const { Text } = Typography;
 
-const QuickActions = ({ 
+type QuickAction = {
+  key: string;
+  icon: React.ReactNode;
+  label: string;
+  tooltip: string;
+  disabled?: boolean;
+  onClick: () => void;
+  type?: ButtonProps['type'];
+  danger?: boolean;
+  loading?: boolean;
+};
+
+const QuickActions = ({
   position = 'floating', // floating, inline, sidebar
-  size = 'default',
+  size = 'middle',
   showLabels = false,
-  customActions = []
+  customActions = [] as QuickAction[],
+}: {
+  position?: string;
+  size?: ButtonProps['size'];
+  showLabels?: boolean;
+  customActions?: QuickAction[];
 }) => {
   const { state, actions } = useAppContext();
   const { app, project, editor, preview } = state;
   
   // 基础操作
-  const baseActions = [
+  const baseActions: QuickAction[] = [
     {
       key: 'save',
       icon: <SaveOutlined />,
@@ -64,7 +81,7 @@ const QuickActions = ({
   ];
   
   // 预览操作
-  const previewActions = [
+  const previewActions: QuickAction[] = [
     {
       key: 'preview',
       icon: <EyeOutlined />,
@@ -89,7 +106,7 @@ const QuickActions = ({
   ];
   
   // 导出操作
-  const exportActions = [
+  const exportActions: QuickAction[] = [
     {
       key: 'download',
       icon: <DownloadOutlined />,
@@ -115,7 +132,7 @@ const QuickActions = ({
   ];
   
   // 编辑操作
-  const editActions = [
+  const editActions: QuickAction[] = [
     {
       key: 'copy',
       icon: <CopyOutlined />,
@@ -143,7 +160,7 @@ const QuickActions = ({
   ];
   
   // 播放控制操作
-  const playbackActions = [
+  const playbackActions: QuickAction[] = [
     {
       key: 'backward',
       icon: <BackwardOutlined />,
@@ -171,7 +188,7 @@ const QuickActions = ({
   // 根据当前步骤选择显示的操作
   const getActionsForCurrentStep = () => {
     const currentStep = app.currentStep;
-    let actions = [...baseActions];
+    let actions: QuickAction[] = [...baseActions];
     
     switch (currentStep) {
       case 0: // 脚本生成
@@ -205,9 +222,8 @@ const QuickActions = ({
   const actionList = getActionsForCurrentStep();
   
   // 渲染按钮
-  const renderButton = (action) => {
-    const buttonProps = {
-      key: action.key,
+  const renderButton = (action: QuickAction) => {
+    const buttonProps: ButtonProps = {
       icon: action.icon,
       size: size,
       type: action.type || 'default',
@@ -218,7 +234,7 @@ const QuickActions = ({
     };
     
     const button = showLabels ? (
-      <Button {...buttonProps}>
+      <Button key={action.key} {...buttonProps}>
         {action.label}
       </Button>
     ) : (

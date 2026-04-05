@@ -40,7 +40,12 @@ function VideoDownload({ videoId, onNewVideo }) {
 
   const checkVideoStatus = async () => {
     try {
-      const data = await api.get(`/video/status/${videoId}`);
+      const data = (await api.get(`/video/status/${videoId}`)) as {
+        status?: string;
+        download_url?: string;
+        cloud_download_url?: string;
+        storage_type?: string;
+      };
       if (data.status === 'completed') {
         setDownloadUrl(data.download_url);
         setCloudDownloadUrl(data.cloud_download_url);

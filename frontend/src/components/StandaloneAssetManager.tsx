@@ -66,6 +66,7 @@ function StandaloneAssetManager() {
             key="projects"
           >
             <ProjectManager
+              currentProject={null}
               onProjectLoad={handleProjectLoad}
               onProjectSave={handleProjectSave}
               script={null}

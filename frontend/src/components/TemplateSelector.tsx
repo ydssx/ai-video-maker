@@ -22,7 +22,7 @@ function TemplateSelector({ selectedTemplate, onTemplateChange }) {
     setLoading(true);
     setError(null);
     try {
-      const data = await api.get('/video/templates');
+      const data = (await api.get('/video/templates')) as { templates?: unknown[] };
       setTemplates(data.templates || []);
     } catch (err) {
       setError('模板加载失败');
@@ -160,7 +160,7 @@ function TemplateSelector({ selectedTemplate, onTemplateChange }) {
             <div style={{ marginBottom: 12 }}>
               <Tag color={getCategoryColor(template.category)}>{template.category}</Tag>
               {template.tags && template.tags.map(tag => (
-                <Tag key={tag} size="small">{tag}</Tag>
+                <Tag key={tag}>{tag}</Tag>
               ))}
             </div>
             
@@ -169,7 +169,7 @@ function TemplateSelector({ selectedTemplate, onTemplateChange }) {
                 <Tooltip title="预览模板">
                   <Button
                     type="text"
-                    size="small"
+                   
                     icon={<EyeOutlined />}
                     onClick={(e) => handleTemplatePreview(template, e)}
                     aria-label={`预览模板: ${template.name}`}
@@ -182,7 +182,7 @@ function TemplateSelector({ selectedTemplate, onTemplateChange }) {
               
               <Button
                 type={isSelected ? 'primary' : 'default'}
-                size="small"
+               
                 onClick={(e) => {
                   e.stopPropagation();
                   handleTemplateSelect(template);
@@ -258,7 +258,7 @@ function TemplateSelector({ selectedTemplate, onTemplateChange }) {
             <Tabs
               activeKey={selectedCategory}
               onChange={setSelectedCategory}
-              size="small"
+             
               style={{ marginBottom: 0 }}
             >
               {categories.map(category => (

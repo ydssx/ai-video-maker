@@ -12,6 +12,7 @@ import {
   Grid,
   Segmented,
   Alert,
+  type MenuProps,
 } from 'antd';
 import {
   UserOutlined,
@@ -174,31 +175,29 @@ const AppShell = () => {
     },
   ];
 
-  const moreMenu = {
-    items: [
-      {
-        key: 'performance',
-        label: t('header.performance'),
-        icon: <DashboardOutlined />,
-        onClick: () => setView(VIEW.PERFORMANCE),
-      },
-      {
-        key: 'user',
-        label: t('header.user'),
-        icon: <UserOutlined />,
-        onClick: () => setUserDrawerOpen(true),
-      },
-      { key: 'settings', label: t('header.settings'), icon: <SettingOutlined /> },
-      { key: 'help', label: t('header.help'), icon: <QuestionCircleOutlined /> },
-      { type: 'divider' },
-      {
-        key: 'logout',
-        label: t('header.logout'),
-        icon: <LogoutOutlined />,
-        onClick: logout,
-      },
-    ],
-  };
+  const moreMenuItems: MenuProps['items'] = [
+    {
+      key: 'performance',
+      label: t('header.performance'),
+      icon: <DashboardOutlined />,
+      onClick: () => setView(VIEW.PERFORMANCE),
+    },
+    {
+      key: 'user',
+      label: t('header.user'),
+      icon: <UserOutlined />,
+      onClick: () => setUserDrawerOpen(true),
+    },
+    { key: 'settings', label: t('header.settings'), icon: <SettingOutlined /> },
+    { key: 'help', label: t('header.help'), icon: <QuestionCircleOutlined /> },
+    { type: 'divider' },
+    {
+      key: 'logout',
+      label: t('header.logout'),
+      icon: <LogoutOutlined />,
+      onClick: logout,
+    },
+  ];
 
   const centerContent = () => {
     if (view === VIEW.PERFORMANCE) {
@@ -271,7 +270,7 @@ const AppShell = () => {
                 资源库
               </Button>
             </Badge>
-            <Dropdown menu={moreMenu} placement="bottomRight" trigger={['click']}>
+            <Dropdown menu={{ items: moreMenuItems }} placement="bottomRight" trigger={['click']}>
               <Button icon={<MoreOutlined />} type="text">
                 更多
               </Button>

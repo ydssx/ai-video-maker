@@ -251,19 +251,19 @@ function ScriptGenerator({ onScriptGenerated }) {
         </Col>
 
         <Col span={8}>
-          <Card title="主题建议" size="small" style={{ height: 'fit-content' }}>
+          <Card title="主题建议" style={{ height: 'fit-content' }}>
             <div style={{ marginBottom: 12 }}>
               <BulbOutlined style={{ color: '#faad14', marginRight: 8 }} />
               <span style={{ fontSize: '12px', color: '#666' }}>
                 点击下方主题快速填入
               </span>
             </div>
-            <Space direction="vertical" size="small" style={{ width: '100%' }}>
+            <Space direction="vertical" style={{ width: '100%' }}>
               {suggestions.map((suggestion, index) => (
                 <Button
                   key={index}
                   type="text"
-                  size="small"
+                 
                   onClick={() => handleSuggestionClick(suggestion)}
                   style={{ 
                     textAlign: 'left', 
@@ -278,7 +278,7 @@ function ScriptGenerator({ onScriptGenerated }) {
             </Space>
             <Button 
               type="link" 
-              size="small" 
+              
               onClick={generateSuggestions}
               style={{ padding: 0, marginTop: 8 }}
             >
@@ -287,8 +287,8 @@ function ScriptGenerator({ onScriptGenerated }) {
           </Card>
 
           {templates.length > 0 && (
-            <Card title="脚本模板" size="small" style={{ marginTop: 16 }}>
-              <Space direction="vertical" size="small" style={{ width: '100%' }}>
+            <Card title="脚本模板" style={{ marginTop: 16 }}>
+              <Space direction="vertical" style={{ width: '100%' }}>
                 {templates.map((template, index) => (
                   <div key={index} style={{ 
                     padding: '8px', 
@@ -354,7 +354,7 @@ function ScriptGenerator({ onScriptGenerated }) {
             {script.scenes.map((scene, index) => (
               <Col span={24} key={index}>
                 <Card 
-                  size="small"
+                 
                   className="scene-card"
                   style={{ 
                     background: index % 2 === 0 ? '#fafafa' : '#ffffff',
@@ -379,10 +379,10 @@ function ScriptGenerator({ onScriptGenerated }) {
                     </Col>
                     <Col span={22}>
                       <div style={{ marginBottom: 8 }}>
-                        <Tag color="purple" size="small">
+                        <Tag color="purple">
                           {scene.duration}秒
                         </Tag>
-                        <Tag color="geekblue" size="small">
+                        <Tag color="geekblue">
                           {scene.transition}
                         </Tag>
                       </div>
@@ -402,7 +402,7 @@ function ScriptGenerator({ onScriptGenerated }) {
                           关键词：
                         </span>
                         {scene.image_keywords.map(keyword => (
-                          <Tag key={keyword} color="cyan" size="small">
+                          <Tag key={keyword} color="cyan">
                             {keyword}
                           </Tag>
                         ))}
@@ -428,7 +428,7 @@ function ScriptGenerator({ onScriptGenerated }) {
               action={
                 <Button 
                   type="primary" 
-                  size="small"
+                 
                   onClick={() => onScriptGenerated(script)}
                 >
                   继续制作视频
