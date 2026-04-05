@@ -50,7 +50,11 @@ function VideoExport({ videoId }) {
   // 获取视频信息
   const fetchVideoInfo = useCallback(async () => {
     try {
-      const data = await api.get(`/video/status/${videoId}`);
+      const data = (await api.get(`/video/status/${videoId}`)) as {
+        status?: string;
+        preview_url?: string;
+        download_url?: string;
+      };
       setVideoInfo(data);
       
       if (data.status === 'completed' && !hasAnnouncedRef.current) {
@@ -221,7 +225,7 @@ function VideoExport({ videoId }) {
             description="正在生成您的视频，请稍候..."
             type="info"
             showIcon
-            icon={<ProcessingLoader size="small" />}
+            icon={<ProcessingLoader />}
             style={{ marginBottom: 16 }}
           />
         );

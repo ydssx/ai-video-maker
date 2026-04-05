@@ -1,5 +1,5 @@
 import React from 'react';
-import { Spin, Progress, Card, Typography, Space } from 'antd';
+import { Spin, Progress, Card, Typography, Space, type SpinProps } from 'antd';
 import {
   LoadingOutlined,
   CheckCircleOutlined,
@@ -9,6 +9,8 @@ import {
 
 const { Text, Title } = Typography;
 
+type LoaderSize = NonNullable<SpinProps['size']>;
+
 const LoadingIndicator = ({
   loading = false,
   progress = 0,
@@ -16,8 +18,17 @@ const LoadingIndicator = ({
   title = '处理中...',
   description = '',
   showProgress = false,
-  size = 'default', // small, default, large
+  size = 'default' as LoaderSize, // small, default, large
   type = 'spin' // spin, progress, card
+}: {
+  loading?: boolean;
+  progress?: number;
+  status?: string;
+  title?: string;
+  description?: string;
+  showProgress?: boolean;
+  size?: LoaderSize;
+  type?: string;
 }) => {
   // 根据状态选择图标
   const getIcon = () => {
@@ -93,7 +104,6 @@ const LoadingIndicator = ({
             status={status === 'error' ? 'exception' : status === 'success' ? 'success' : 'active'}
             strokeColor={getColor()}
             showInfo={showProgress}
-            size={size}
           />
           
           {description && (

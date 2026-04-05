@@ -73,7 +73,7 @@ function ProjectManager({
   const loadProjects = async () => {
     setLoading(true);
     try {
-      const data = await api.get('/projects/list');
+      const data = (await api.get('/projects/list')) as { projects?: unknown[] };
       setProjects(data.projects || []);
     } catch (error) {
       console.error('加载项目失败:', error);
@@ -107,7 +107,7 @@ function ProjectManager({
         updated_time: new Date().toISOString()
       };
 
-      const response = await api.post('/projects/save', projectData);
+      const response = (await api.post('/projects/save', projectData)) as { project?: unknown };
       
       message.success('项目保存成功');
       setSaveModalVisible(false);
@@ -125,7 +125,7 @@ function ProjectManager({
 
   const loadProject = async (project) => {
     try {
-      const data = await api.get(`/projects/${project.id}`);
+      const data = (await api.get(`/projects/${project.id}`)) as { project: Record<string, unknown> };
       const projectData = data.project;
       
       message.success(`已加载项目：${projectData.name}`);
@@ -238,15 +238,19 @@ function ProjectManager({
       const matchesCategory = filterCategory === 'all' || project.category === filterCategory;
       return matchesSearch && matchesCategory;
     })
-    .sort((a, b) => {
+    .sort((a: { name: string; created_time?: string; updated_time?: string }, b) => {
       switch (sortBy) {
         case 'name':
           return a.name.localeCompare(b.name);
         case 'created_time':
-          return new Date(b.created_time) - new Date(a.created_time);
+          return (
+            new Date(b.created_time || 0).getTime() - new Date(a.created_time || 0).getTime()
+          );
         case 'updated_time':
         default:
-          return new Date(b.updated_time) - new Date(a.updated_time);
+          return (
+            new Date(b.updated_time || 0).getTime() - new Date(a.updated_time || 0).getTime()
+          );
       }
     });
 
@@ -274,7 +278,7 @@ function ProjectManager({
   return (
     <div className="project-manager">
       {/* 项目统计 */}
-      <Card size="small" style={{ marginBottom: 16 }}>
+      <Card style={{ marginBottom: 16 }}>
         <Row gutter={[16, 8]}>
           <Col span={6}>
             <div style={{ textAlign: 'center' }}>
@@ -291,8 +295,8 @@ function ProjectManager({
                 {Object.entries(stats.categoryCounts).map(([category, count]) => {
                   const categoryInfo = getCategoryInfo(category);
                   return (
-                    <Tag key={category} color={categoryInfo.color} size="small">
-                      {categoryInfo.label}: {count}
+                    <Tag key={category} color={categoryInfo.color}>
+                      {categoryInfo.label}: {String(count)}
                     </Tag>
                   );
                 })}
@@ -303,7 +307,7 @@ function ProjectManager({
       </Card>
 
       {/* 操作栏 */}
-      <Card size="small" style={{ marginBottom: 16 }}>
+      <Card style={{ marginBottom: 16 }}>
         <Row gutter={[8, 8]} align="middle">
           <Col span={6}>
             <Button 
@@ -320,14 +324,14 @@ function ProjectManager({
               placeholder={t('project.search.placeholder', '搜索项目...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              size="small"
+             
             />
           </Col>
           <Col span={6}>
             <Select
               value={filterCategory}
               onChange={setFilterCategory}
-              size="small"
+             
               style={{ width: '100%' }}
             >
               <Option value="all">所有分类</Option>
@@ -342,7 +346,7 @@ function ProjectManager({
             <Select
               value={sortBy}
               onChange={setSortBy}
-              size="small"
+             
               style={{ width: '100%' }}
             >
               <Option value="updated_time">最近更新</Option>
@@ -411,11 +415,11 @@ function ProjectManager({
                   title={
                     <div>
                       <span style={{ marginRight: 8 }}>{project.name}</span>
-                      <Tag color={categoryInfo.color} size="small">
+                      <Tag color={categoryInfo.color}>
                         {categoryInfo.label}
                       </Tag>
                       {project.tags && project.tags.map(tag => (
-                        <Tag key={tag} size="small" style={{ marginLeft: 4 }}>
+                        <Tag key={tag} style={{ marginLeft: 4 }}>
                           {tag}
                         </Tag>
                       ))}
@@ -491,7 +495,7 @@ function ProjectManager({
           >
             {categories.map(cat => (
               <Option key={cat.value} value={cat.value}>
-                <Tag color={cat.color} size="small" style={{ marginRight: 8 }}>
+                <Tag color={cat.color} style={{ marginRight: 8 }}>
                   {cat.label}
                 </Tag>
               </Option>
@@ -550,7 +554,7 @@ function ProjectManager({
           >
             {categories.map(cat => (
               <Option key={cat.value} value={cat.value}>
-                <Tag color={cat.color} size="small" style={{ marginRight: 8 }}>
+                <Tag color={cat.color} style={{ marginRight: 8 }}>
                   {cat.label}
                 </Tag>
               </Option>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Steps, Card, Button, Space, Progress, Tag, Tooltip } from 'antd';
+import { Steps, Card, Button, Space, Progress, Tag, Tooltip, type StepsProps } from 'antd';
 import {
   FileTextOutlined,
   SettingOutlined,
@@ -195,7 +195,7 @@ const StepNavigation = ({ onStepChange, compact = false }) => {
                 title={step.title}
                 description={step.description}
                 icon={getStepStatusIcon(step, index)}
-                status={step.status}
+                status={step.status as StepsProps['status']}
                 onClick={() => handleStepClick(index)}
                 style={{ 
                   cursor: isStepAccessible(index) ? 'pointer' : 'default',

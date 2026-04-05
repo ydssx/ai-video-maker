@@ -200,7 +200,7 @@ function AudioManager({ onAudioConfigChange }) {
                 accept="audio/*"
                 showUploadList={false}
               >
-                <Button icon={<UploadOutlined />} size="small">
+                <Button icon={<UploadOutlined />}>
                   上传音频
                 </Button>
               </Upload>
@@ -209,20 +209,20 @@ function AudioManager({ onAudioConfigChange }) {
             {uploadProgress > 0 && (
               <Progress 
                 percent={uploadProgress} 
-                size="small" 
+                
                 style={{ marginBottom: 16 }}
               />
             )}
             
             <List
-              size="small"
+             
               dataSource={audioFiles}
               renderItem={(audio) => (
                 <List.Item
                   actions={[
                     <Button
                       type="text"
-                      size="small"
+                     
                       icon={
                         currentPlaying === audio.id ? 
                         <PauseCircleOutlined /> : 
@@ -232,7 +232,7 @@ function AudioManager({ onAudioConfigChange }) {
                     />,
                     <Button
                       type="text"
-                      size="small"
+                     
                       onClick={() => setAsBackgroundMusic(audio)}
                     >
                       设为背景音乐
@@ -243,7 +243,7 @@ function AudioManager({ onAudioConfigChange }) {
                     >
                       <Button
                         type="text"
-                        size="small"
+                       
                         danger
                         icon={<DeleteOutlined />}
                       />
@@ -293,13 +293,13 @@ function AudioManager({ onAudioConfigChange }) {
                     <Switch
                       checked={fadeInOut}
                       onChange={setFadeInOut}
-                      size="small"
+                     
                     />
                     <span style={{ marginLeft: 8 }}>淡入淡出</span>
                   </div>
                   <Button
                     type="link"
-                    size="small"
+                   
                     onClick={() => setBackgroundMusic(null)}
                   >
                     移除背景音乐
@@ -327,14 +327,14 @@ function AudioManager({ onAudioConfigChange }) {
 
               {soundEffects.length > 0 ? (
                 <List
-                  size="small"
+                 
                   dataSource={soundEffects}
                   renderItem={(effect) => (
                     <List.Item
                       actions={[
                         <Button
                           type="text"
-                          size="small"
+                         
                           danger
                           icon={<DeleteOutlined />}
                           onClick={() => removeSoundEffect(effect.id)}
@@ -347,7 +347,7 @@ function AudioManager({ onAudioConfigChange }) {
                             {effect.audioFile.name}
                             <Tag 
                               color={effectTypes.find(t => t.value === effect.type)?.color}
-                              size="small"
+                             
                               style={{ marginLeft: 8 }}
                             >
                               {effectTypes.find(t => t.value === effect.type)?.label}
@@ -404,7 +404,7 @@ function AudioManager({ onAudioConfigChange }) {
               </Select>
             </Col>
             <Col span={4}>
-              <Button type="primary" size="small">
+              <Button type="primary">
                 添加音效
               </Button>
             </Col>

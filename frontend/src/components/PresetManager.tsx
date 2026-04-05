@@ -160,7 +160,7 @@ function PresetManager({ currentConfig, onApplyPreset }) {
           </Button>
           <Button 
             onClick={createDefaultPresets}
-            size="small"
+           
           >
             创建默认预设
           </Button>
@@ -181,7 +181,7 @@ function PresetManager({ currentConfig, onApplyPreset }) {
           {presets.map(preset => (
             <Col span={12} key={preset.id}>
               <Card
-                size="small"
+               
                 hoverable
                 actions={[
                   <Tooltip title="使用预设">
@@ -223,17 +223,17 @@ function PresetManager({ currentConfig, onApplyPreset }) {
                 </p>
                 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                  <Tag color={getStyleColor(preset.style)} size="small">
+                  <Tag color={getStyleColor(preset.style)}>
                     {preset.style}
                   </Tag>
-                  <Tag color={getDurationColor(preset.duration)} size="small">
+                  <Tag color={getDurationColor(preset.duration)}>
                     {preset.duration}
                   </Tag>
-                  <Tag color="blue" size="small">
+                  <Tag color="blue">
                     {preset.template_id}
                   </Tag>
                   {preset.voice_config?.enabled && (
-                    <Tag color="green" size="small">
+                    <Tag color="green">
                       语音
                     </Tag>
                   )}

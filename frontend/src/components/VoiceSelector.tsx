@@ -17,7 +17,9 @@ function VoiceSelector({ voiceConfig, onVoiceConfigChange }) {
 
   const fetchVoices = async () => {
     try {
-      const data = await api.get('/video/voices');
+      const data = (await api.get('/video/voices')) as {
+        voices?: { gtts: unknown[]; openai: unknown[] };
+      };
       setVoices(data.voices || { gtts: [], openai: [] });
     } catch (error) {
       console.error('获取语音选项失败:', error);
@@ -32,10 +34,10 @@ function VoiceSelector({ voiceConfig, onVoiceConfigChange }) {
   const handlePreviewVoice = async () => {
     setLoading(true);
     try {
-      const data = await api.post('/video/preview-voice', {
+      const data = (await api.post('/video/preview-voice', {
         text: t('voice.preview.sample', '这是一个语音预览示例，您可以听到选择的语音效果。'),
         voice_config: voiceConfig
-      });
+      })) as { audio_url?: string };
       
       setPreviewUrl(data.audio_url);
       

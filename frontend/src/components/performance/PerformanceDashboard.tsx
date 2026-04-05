@@ -10,16 +10,24 @@ import {
   SyncOutlined
 } from '@ant-design/icons';
 import { Line, Pie } from '@ant-design/plots';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import './PerformanceDashboard.css';
 
 const { TabPane } = Tabs;
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
+type PerformanceState = {
+  apiResponseTime: number;
+  cacheHitRate: number;
+  activeTasks: number;
+  totalTasks: number;
+  responseTimeTrend: { time: string; value: number }[];
+  cacheDistribution: { type: string; value: number }[];
+};
+
 // 模拟API数据
-const fetchPerformanceData = async () => {
-  // 实际项目中这里应该是API调用
+const fetchPerformanceData = async (): Promise<PerformanceState> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
@@ -28,7 +36,7 @@ const fetchPerformanceData = async () => {
         activeTasks: 12,
         totalTasks: 50,
         responseTimeTrend: Array.from({ length: 24 }, (_, i) => ({
-          time: moment().subtract(23 - i, 'hours').format('HH:00'),
+          time: dayjs().subtract(23 - i, 'hour').format('HH:00'),
           value: Math.floor(Math.random() * 100) + 200,
         })),
         cacheDistribution: [
@@ -74,7 +82,7 @@ const StatusTag = ({ status }) => {
 
 const PerformanceDashboard = () => {
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState({
+  const [data, setData] = useState<PerformanceState>({
     apiResponseTime: 0,
     cacheHitRate: 0,
     activeTasks: 0,
@@ -235,9 +243,9 @@ const PerformanceDashboard = () => {
             showTime 
             onChange={handleDateChange}
             ranges={{
-              '今天': [moment().startOf('day'), moment().endOf('day')],
-              '本周': [moment().startOf('week'), moment().endOf('week')],
-              '本月': [moment().startOf('month'), moment().endOf('month')],
+              '今天': [dayjs().startOf('day'), dayjs().endOf('day')],
+              '本周': [dayjs().startOf('week'), dayjs().endOf('week')],
+              '本月': [dayjs().startOf('month'), dayjs().endOf('month')],
             }}
             style={{ width: 360 }}
           />
@@ -344,7 +352,7 @@ const PerformanceDashboard = () => {
                 {data.activeTasks > 10 ? '系统繁忙' : '系统正常'}
               </div>
               <div style={{ color: '#666', fontSize: 12 }}>
-                最后更新: {moment().format('YYYY-MM-DD HH:mm:ss')}
+                最后更新: {dayjs().format('YYYY-MM-DD HH:mm:ss')}
               </div>
               <div style={{ marginTop: 8 }}>
                 <Button type="link" size="small" icon={<ReloadOutlined />} onClick={handleRefresh}>

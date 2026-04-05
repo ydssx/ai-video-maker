@@ -1,8 +1,5 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
 import { message } from 'antd';
-
-// 创建上下文
-const AppContext = createContext();
 
 // 初始状态
 const initialState = {
@@ -68,6 +65,38 @@ const initialState = {
     progress: 0
   }
 };
+
+export type AppState = typeof initialState;
+
+export type AppActions = {
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  clearError: () => void;
+  setCurrentStep: (step: number) => void;
+  addNotification: (msg: string, type?: string) => void;
+  setProject: (project: unknown) => void;
+  updateProject: (updates: Record<string, unknown>) => void;
+  setScript: (script: unknown) => void;
+  setVideoConfig: (config: Record<string, unknown>) => void;
+  setVideoId: (videoId: string | number | null) => void;
+  markProjectDirty: () => void;
+  markProjectClean: () => void;
+  setActiveTab: (tab: string) => void;
+  updateTimeline: (updates: Record<string, unknown>) => void;
+  updateTextStyle: (updates: Record<string, unknown>) => void;
+  setAssets: (assets: unknown[]) => void;
+  addAsset: (asset: unknown) => void;
+  removeAsset: (assetId: string | number) => void;
+  selectAssets: (assetIds: (string | number)[]) => void;
+  updatePreview: (updates: Record<string, unknown>) => void;
+  setPreviewStatus: (status: string) => void;
+  setPreviewProgress: (progress: number) => void;
+  updateUserPreferences: (preferences: Record<string, unknown>) => void;
+};
+
+export type AppContextValue = { state: AppState; actions: AppActions };
+
+const AppContext = createContext<AppContextValue | null>(null);
 
 // Action 类型
 export const ActionTypes = {
@@ -285,7 +314,7 @@ const appReducer = (state, action) => {
 };
 
 // Context Provider 组件
-export const AppProvider = ({ children }) => {
+export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
   
   // 自动保存功能
@@ -344,7 +373,7 @@ export const AppProvider = ({ children }) => {
   }, [state.app.notifications]);
   
   // Action creators
-  const actions = {
+  const actions: AppActions = {
     // 应用状态管理
     setLoading: (loading) => dispatch({ type: ActionTypes.SET_LOADING, payload: loading }),
     setError: (error) => dispatch({ type: ActionTypes.SET_ERROR, payload: error }),

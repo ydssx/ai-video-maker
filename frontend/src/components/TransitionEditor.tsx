@@ -238,9 +238,9 @@ function TransitionEditor({ script, onTransitionChange }) {
       <Row gutter={[16, 16]}>
         {/* 转场效果库 */}
         <Col span={8}>
-          <Card title="转场效果库" size="small">
+          <Card title="转场效果库">
             <List
-              size="small"
+             
               dataSource={transitionTypes}
               renderItem={(type) => (
                 <List.Item
@@ -298,11 +298,11 @@ function TransitionEditor({ script, onTransitionChange }) {
             title="场景转场设置"
             extra={
               <Space>
-                <Button size="small" onClick={resetTransitions}>
+                <Button onClick={resetTransitions}>
                   重置全部
                 </Button>
                 <Button 
-                  size="small" 
+                  
                   type="primary"
                   onClick={() => setPreviewMode(!previewMode)}
                   loading={previewMode}
@@ -344,11 +344,11 @@ function TransitionEditor({ script, onTransitionChange }) {
                             value={transition.type}
                             onChange={(value) => updateTransition(transition.id, { type: value })}
                             style={{ width: '100%' }}
-                            size="small"
+                           
                           >
                             {transitionTypes.map(type => (
                               <Option key={type.id} value={type.id}>
-                                <Tag color={type.color} size="small" style={{ marginRight: 8 }}>
+                                <Tag color={type.color} style={{ marginRight: 8 }}>
                                   {type.preview}
                                 </Tag>
                                 {type.name}
@@ -380,7 +380,7 @@ function TransitionEditor({ script, onTransitionChange }) {
                             value={transition.easing}
                             onChange={(value) => updateTransition(transition.id, { easing: value })}
                             style={{ width: '100%' }}
-                            size="small"
+                           
                           >
                             <Option value="linear">线性</Option>
                             <Option value="ease">缓动</Option>
@@ -396,7 +396,7 @@ function TransitionEditor({ script, onTransitionChange }) {
                       <Col span={24}>
                         <Space>
                           <Button
-                            size="small"
+                           
                             icon={<PlayCircleOutlined />}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -407,7 +407,7 @@ function TransitionEditor({ script, onTransitionChange }) {
                           </Button>
                           
                           <Button
-                            size="small"
+                           
                             onClick={(e) => {
                               e.stopPropagation();
                               applyToAll('type', transition.type);
@@ -417,7 +417,7 @@ function TransitionEditor({ script, onTransitionChange }) {
                           </Button>
                           
                           <Button
-                            size="small"
+                           
                             onClick={(e) => {
                               e.stopPropagation();
                               applyToAll('duration', transition.duration);
@@ -449,7 +449,7 @@ function TransitionEditor({ script, onTransitionChange }) {
               >
                 {transitionTypes.map(type => (
                   <Option key={type.id} value={type.id}>
-                    <Tag color={type.color} size="small" style={{ marginRight: 8 }}>
+                    <Tag color={type.color} style={{ marginRight: 8 }}>
                       {type.preview}
                     </Tag>
                     {type.name}

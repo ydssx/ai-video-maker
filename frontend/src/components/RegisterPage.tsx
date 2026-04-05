@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Card, message } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { register } from '../services/api';
+import api from '../utils/api';
 
 const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
@@ -11,7 +11,7 @@ const RegisterPage = () => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      await register(values);
+      await api.post('/users/register', values);
       message.success('注册成功！现在您可以登录了。');
       navigate('/login');
     } catch (error) {
