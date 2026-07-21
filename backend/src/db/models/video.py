@@ -7,8 +7,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from sqlalchemy import Column, DateTime, Enum as SQLEnum, ForeignKey, Integer, String, Text
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON, Column, DateTime, Enum as SQLEnum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from .base import BaseModel
@@ -54,7 +53,7 @@ class Video(BaseModel):
     thumbnail_path = Column(String(512), nullable=True)
     
     # 视频元数据（避免使用 SQLAlchemy 保留名 metadata）
-    metadata_ = Column("metadata", JSONB, default=dict, nullable=False)
+    metadata_ = Column("metadata", JSON, default=dict, nullable=False)
     
     # 关系
     project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)

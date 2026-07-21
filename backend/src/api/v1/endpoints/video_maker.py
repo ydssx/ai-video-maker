@@ -12,12 +12,16 @@ from src.services.task_queue import is_celery_enabled, get_task_progress
 from src.services.tasks.video_tasks import create_video_task
 from database_factory import get_db_service
 from src.services.ai_service import ai_service
-from models import VideoRequest, VideoResponse
+from src.schemas.api_models import VideoRequest, VideoResponse
 from pydantic import BaseModel
 
 router = APIRouter()
-db_service = get_db_service()
 logger = logging.getLogger(__name__)
+
+
+def _db():
+    """惰性获取数据库服务，避免模块导入时强制连库"""
+    return get_db_service()
 
 # WebSocket连接管理
 class ConnectionManager:
@@ -71,7 +75,7 @@ async def create_video_internal(request: VideoRequest, background_tasks: Backgro
         
         # 创建视频记录
         try:
-            db_service.create_video(
+            _db().create_video(
                 video_id=video_id,
                 project_id=script_title,  # 临时使用标题作为项目ID
                 user_id=1,  # 临时用户ID
@@ -84,7 +88,7 @@ async def create_video_internal(request: VideoRequest, background_tasks: Backgro
         
         # 记录使用统计
         try:
-            db_service.log_usage(1, "video_generation", {
+            _db().log_usage(1, "video_generation", {
                 "video_id": video_id,
                 "template": request.template_id,
                 "duration": script_duration
@@ -157,9 +161,9 @@ async def create_video_background_task(video_id: str, script_data: Dict, config:
             # 更新数据库状态
             try:
                 if progress == 100:
-                    db_service.update_video(vid_id, status="completed")
+                    _db().update_video(vid_id, status="completed")
                 elif progress == -1:
-                    db_service.update_video(vid_id, status="failed")
+                    _db().update_video(vid_id, status="failed")
             except Exception as e:
                 logger.warning(f"数据库状态更新失败: {str(e)}")
         
@@ -195,7 +199,7 @@ async def create_video_background_task(video_id: str, script_data: Dict, config:
             
             # 更新数据库
             try:
-                db_service.update_video(
+                _db().update_video(
                     video_id,
                     status="completed",
                     file_path=output_path,
@@ -211,7 +215,7 @@ async def create_video_background_task(video_id: str, script_data: Dict, config:
             await progress_callback(video_id, -1, f"创建失败: {str(e)}")
             
             try:
-                db_service.update_video(video_id, status="failed")
+                _db().update_video(video_id, status="failed")
             except Exception as db_e:
                 logger.warning(f"数据库状态更新失败: {str(db_e)}")
         
@@ -219,7 +223,7 @@ async def create_video_background_task(video_id: str, script_data: Dict, config:
         logger.error(f"视频创建任务失败: {str(e)}")
         try:
             await manager.send_progress(video_id, -1, f"任务失败: {str(e)}")
-            db_service.update_video(video_id, status="failed")
+            _db().update_video(video_id, status="failed")
         except Exception as cleanup_e:
             logger.error(f"清理失败: {str(cleanup_e)}")
 
@@ -228,7 +232,7 @@ async def get_video_status(video_id: str):
     """获取视频状态"""
     try:
         # 从数据库获取视频信息
-        video_info = db_service.get_video(video_id)
+        video_info = _db().get_video(video_id)
         if not video_info:
             raise HTTPException(status_code=404, detail="视频不存在")
         
@@ -263,7 +267,7 @@ async def get_video_status(video_id: str):
 async def download_video(video_id: str):
     """下载视频"""
     try:
-        video_info = db_service.get_video(video_id)
+        video_info = _db().get_video(video_id)
         if not video_info:
             raise HTTPException(status_code=404, detail="视频不存在")
         
@@ -272,7 +276,7 @@ async def download_video(video_id: str):
             raise HTTPException(status_code=404, detail="视频文件不存在")
         
         # 记录下载统计
-        db_service.log_usage(video_info['user_id'], "video_download", {
+        _db().log_usage(video_info['user_id'], "video_download", {
             "video_id": video_id
         })
         
@@ -292,7 +296,7 @@ async def download_video(video_id: str):
 async def get_video_thumbnail(video_id: str):
     """获取视频缩略图"""
     try:
-        video_info = db_service.get_video(video_id)
+        video_info = _db().get_video(video_id)
         if not video_info:
             raise HTTPException(status_code=404, detail="视频不存在")
         
@@ -328,7 +332,7 @@ async def cancel_video_processing(video_id: str):
     try:
         success = video_service.cancel_video_processing(video_id)
         if success:
-            db_service.update_video(video_id, status="cancelled")
+            _db().update_video(video_id, status="cancelled")
             return {"message": "视频处理已取消"}
         else:
             raise HTTPException(status_code=404, detail="视频不存在或无法取消")
@@ -545,7 +549,7 @@ async def get_video_stats():
     """获取视频统计信息"""
     try:
         stats = video_service.get_processing_stats()
-        system_stats = db_service.get_system_stats()
+        system_stats = _db().get_system_stats()
         
         return {
             "processing": stats,

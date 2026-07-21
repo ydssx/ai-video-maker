@@ -7,8 +7,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, Enum as SQLEnum
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, JSON, Enum as SQLEnum
 from sqlalchemy.orm import relationship
 
 from .base import BaseModel
@@ -37,8 +36,8 @@ class Project(BaseModel):
     # 项目状态
     status = Column(SQLEnum(ProjectStatus), default=ProjectStatus.DRAFT, nullable=False)
     
-    # 项目配置
-    config = Column(JSONB, default=dict, nullable=False)
+    # 项目配置（MySQL 使用 JSON，避免 PostgreSQL JSONB）
+    config = Column(JSON, default=dict, nullable=False)
     
     # 时间信息
     started_at = Column(DateTime, nullable=True)
@@ -88,7 +87,7 @@ class Project(BaseModel):
         Returns:
             ProjectAsset: 创建的项目资源关联
         """
-        from db.models import ProjectAsset
+        from src.db.models import ProjectAsset
         return ProjectAsset(
             project_id=self.id,
             asset_id=asset_id,

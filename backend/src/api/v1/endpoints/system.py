@@ -12,15 +12,19 @@ from src.services.video_service import video_service
 from src.services.ai_service import ai_service
 
 router = APIRouter()
-db_service = get_db_service()
 logger = logging.getLogger(__name__)
+
+
+def _db():
+    return get_db_service()
+
 
 @router.get("/health")
 async def health_check():
     """系统健康检查"""
     try:
         # 检查数据库连接
-        db_stats = db_service.get_system_stats()
+        db_stats = _db().get_system_stats()
         
         # 检查文件系统
         storage_stats = file_service.get_storage_stats()
@@ -77,7 +81,7 @@ async def get_system_stats():
     """获取系统统计信息"""
     try:
         # 数据库统计
-        db_stats = db_service.get_system_stats()
+        db_stats = _db().get_system_stats()
         
         # 文件存储统计
         storage_stats = file_service.get_storage_stats()
@@ -186,7 +190,7 @@ async def system_cleanup():
         results["old_videos_cleaned"] = old_videos_cleaned
         
         # 清理旧数据
-        old_data_cleaned = db_service.cleanup_old_data()
+        old_data_cleaned = _db().cleanup_old_data()
         results["old_data_cleaned"] = old_data_cleaned
         
         # 重置AI服务统计
@@ -213,7 +217,7 @@ async def get_system_logs(lines: int = 100):
         recent_activities = []
         
         # 从数据库获取最近的活动
-        with db_service._get_connection() as conn:
+        with _db()._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
                 SELECT action_type, action_data, timestamp, user_id
@@ -271,7 +275,7 @@ async def update_system_config(config_updates: Dict):
     try:
         # 保存配置到数据库
         for key, value in config_updates.items():
-            db_service.set_config(key, value)
+            _db().set_config(key, value)
         
         return {
             "message": "配置更新成功",

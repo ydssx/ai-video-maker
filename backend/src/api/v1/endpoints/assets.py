@@ -10,7 +10,7 @@ UNSPLASH_ACCESS_KEY = os.getenv("UNSPLASH_ACCESS_KEY")
 @router.get("/images/search")
 async def search_images(query: str, count: int = 5) -> Dict:
     """搜索图片素材"""
-    from services.content_service import content_service
+    from src.services.content_service import content_service
     
     try:
         images = await content_service.search_images(query, count)
@@ -21,7 +21,7 @@ async def search_images(query: str, count: int = 5) -> Dict:
 @router.post("/images/smart-search")
 async def smart_image_search(request: dict) -> Dict:
     """智能图片搜索"""
-    from services.content_service import content_service
+    from src.services.content_service import content_service
     
     try:
         keywords = request.get("keywords", [])
@@ -68,7 +68,7 @@ async def get_music_library():
 @router.post("/music/recommendations")
 async def get_music_recommendations(request: dict):
     """获取音乐推荐"""
-    from services.content_service import content_service
+    from src.services.content_service import content_service
     
     try:
         style = request.get("style", "educational")

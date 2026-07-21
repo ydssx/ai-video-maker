@@ -6,8 +6,7 @@
 from enum import Enum
 from typing import Optional
 
-from sqlalchemy import Column, Enum as SQLEnum, ForeignKey, Integer, String
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON, Column, Enum as SQLEnum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base import BaseModel
@@ -44,7 +43,7 @@ class VideoRendition(BaseModel):
     duration = Column(Integer, nullable=True)  # 视频时长（秒）
     
     # 元数据（避免使用 SQLAlchemy 保留名 metadata）
-    metadata_ = Column("metadata", JSONB, default=dict, nullable=False)
+    metadata_ = Column("metadata", JSON, default=dict, nullable=False)
     
     # 关系
     video = relationship("Video", back_populates="renditions")

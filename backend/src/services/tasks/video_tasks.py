@@ -6,7 +6,9 @@ from src.services.video_service import video_service
 # 注意：当前任务实现未直接使用 video_service；后续迭代可切换到真实渲染
 
 
-db_service = get_db_service()
+def _db():
+    return get_db_service()
+
 
 
 def _create_video_task_impl(self, video_id: str, script_data: Dict, config: Dict) -> Dict:
@@ -39,7 +41,7 @@ def _create_video_task_impl(self, video_id: str, script_data: Dict, config: Dict
 
     # 更新数据库记录
     try:
-        db_service.update_video(
+        _db().update_video(
             video_id,
             status="completed",
             file_path=result.get("output_path"),

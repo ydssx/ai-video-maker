@@ -3,8 +3,7 @@
 
 管理项目和资源之间的多对多关系。
 """
-from sqlalchemy import Column, ForeignKey, Integer, String, Text
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON, Column, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from .base import BaseModel
@@ -24,7 +23,7 @@ class ProjectAsset(BaseModel):
     
     # 关联类型和元数据
     role = Column(String(50), nullable=True)  # 例如: 'thumbnail', 'background', 'audio_track'
-    metadata_ = Column("metadata", JSONB, default=dict, nullable=False)
+    metadata_ = Column("metadata", JSON, default=dict, nullable=False)
     
     # 关系
     project = relationship("Project", back_populates="assets")

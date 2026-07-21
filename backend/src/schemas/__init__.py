@@ -47,6 +47,20 @@ from .video import (
     VideoRenditionBase,
     VideoRenditionInDB,
 )
+from .api_models import (
+    ScriptRequest,
+    ScriptResponse,
+    SceneData,
+    VideoStyle,
+    VideoDuration,
+    VideoRequest,
+    VideoResponse,
+    VoiceConfig,
+    TextStyle,
+    AudioConfig,
+    TransitionConfig,
+    ExportConfig,
+)
 
 __all__ = [
     # Base
@@ -98,4 +112,18 @@ __all__ = [
     'VideoRendition',
     'VideoRenditionBase',
     'VideoRenditionInDB',
+
+    # Script / video API
+    'ScriptRequest',
+    'ScriptResponse',
+    'SceneData',
+    'VideoStyle',
+    'VideoDuration',
+    'VideoRequest',
+    'VideoResponse',
+    'VoiceConfig',
+    'TextStyle',
+    'AudioConfig',
+    'TransitionConfig',
+    'ExportConfig',
 ]
