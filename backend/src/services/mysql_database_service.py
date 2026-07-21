@@ -34,7 +34,10 @@ class User(Base):
     is_superuser = Column(Boolean, default=False)
     scopes = Column(LONGTEXT, default='[]')
     created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     last_login = Column(DateTime)
+    # ORM 用户仓库使用 preferences；legacy 服务仍读写 settings / quota_data
+    preferences = Column(LONGTEXT, default='{}')
     settings = Column(LONGTEXT, default='{}')
     quota_data = Column(LONGTEXT, default='{}')
     
@@ -183,8 +186,18 @@ class MySQLDatabaseService:
                     alter_stmts.append("ALTER TABLE users ADD COLUMN is_superuser TINYINT(1) NOT NULL DEFAULT 0")
                 if 'scopes' not in existing:
                     alter_stmts.append("ALTER TABLE users ADD COLUMN scopes LONGTEXT NULL")
+                if 'updated_at' not in existing:
+                    alter_stmts.append(
+                        "ALTER TABLE users ADD COLUMN updated_at DATETIME NULL "
+                        "DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+                    )
+                if 'preferences' not in existing:
+                    alter_stmts.append(
+                        "ALTER TABLE users ADD COLUMN preferences LONGTEXT NULL"
+                    )
                 for stmt in alter_stmts:
                     conn.execute(text(stmt))
+                    conn.commit()
         except Exception as e:
             logger.warning(f"用户表迁移检查失败: {str(e)}")
     

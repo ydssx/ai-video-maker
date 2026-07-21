@@ -34,8 +34,8 @@ class User(BaseModel):
     # avatar = Column(String(255), nullable=True)
     # bio = Column(Text, nullable=True)
     
-    # 设置和首选项
-    preferences = Column(JSON, default=dict, nullable=False)
+    # 设置和首选项（与 mysql_database_service 迁移列对齐）
+    preferences = Column(JSON, default=dict, nullable=True)
     
     # 关系
     projects = relationship("Project", back_populates="owner", cascade="all, delete-orphan")
@@ -78,14 +78,14 @@ class User(BaseModel):
         Returns:
             User: 新创建的用户实例
         """
-        from core.security import get_password_hash
+        from src.core.security import get_password_hash
         
         return cls(
             username=username,
             email=email,
             hashed_password=get_password_hash(password),
-            full_name=full_name,
             is_superuser=is_superuser,
+            preferences={},
         )
     
     def verify_password(self, password: str) -> bool:
@@ -98,5 +98,5 @@ class User(BaseModel):
         Returns:
             bool: 密码是否匹配
         """
-        from core.security import verify_password
+        from src.core.security import verify_password
         return verify_password(password, self.hashed_password)

@@ -54,7 +54,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 静态文件服务
+# 静态文件服务（确保目录存在，避免启动失败）
+for _static_dir in ("../assets", "../data/output", "../data/uploads"):
+    os.makedirs(_static_dir, exist_ok=True)
 app.mount("/assets", StaticFiles(directory="../assets"), name="assets")
 app.mount("/output", StaticFiles(directory="../data/output"), name="output")
 app.mount("/uploads", StaticFiles(directory="../data/uploads"), name="uploads")
@@ -70,28 +72,22 @@ async def health_check():
     """健康检查，包含数据库连接状态"""
     try:
         db_service = get_db_service()
-        
-        # 测试数据库连接
-        if hasattr(db_service, 'test_connection'):
-            db_status = db_service.test_connection()
-        else:
-            # SQLite数据库服务的简单测试
-            try:
-                db_service.get_system_stats()
-                db_status = True
-            except:
-                db_status = False
-        
+        db_status = (
+            db_service.test_connection()
+            if hasattr(db_service, "test_connection")
+            else False
+        )
         return {
             "status": "healthy" if db_status else "unhealthy",
             "database": "connected" if db_status else "disconnected",
-            "database_type": "mysql" if hasattr(db_service, 'engine') else "sqlite"
+            "database_type": "mysql",
         }
     except Exception as e:
         return {
             "status": "unhealthy",
             "database": "error",
-            "error": str(e)
+            "database_type": "mysql",
+            "error": str(e),
         }
 
 if __name__ == "__main__":

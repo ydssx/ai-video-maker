@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from openai import OpenAI
 import os
 import json
-from models import ScriptRequest, ScriptResponse, SceneData, VideoStyle
+from src.schemas.api_models import ScriptRequest, ScriptResponse, SceneData, VideoStyle
 
 router = APIRouter()
 

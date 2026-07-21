@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings
-from pydantic import validator
-from typing import List, Optional
+from pydantic import field_validator, model_validator
+from typing import List, Optional, Any, Union
+import json
 import os
 
 
@@ -18,12 +19,12 @@ class Settings(BaseSettings):
     port: int = 8000
     workers: int = 1
 
-    # 数据库配置
-    database_url: str = "sqlite:///data/app.db"
+    # 数据库配置（产品以 MySQL 为准；空字符串表示使用 MYSQL_* 构建）
+    database_url: str = ""
     database_pool_size: int = 10
     database_max_overflow: int = 20
 
-    # MySQL配置（当使用MySQL时）
+    # MySQL配置
     mysql_host: str = "localhost"
     mysql_port: int = 3306
     mysql_user: str = "root"
@@ -42,7 +43,7 @@ class Settings(BaseSettings):
     celery_broker_url: Optional[str] = None
     celery_result_backend: Optional[str] = None
 
-    # JWT配置
+    # JWT配置（统一使用 secret_key / algorithm）
     secret_key: str = "your-secret-key-please-change-this-in-production"
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60 * 24 * 7  # 7天
@@ -53,7 +54,7 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-3.5-turbo"
     openai_max_tokens: int = 1500
     openai_temperature: float = 0.7
-    
+
     # Gemini API配置
     gemini_api_key: str = ""
 
@@ -66,21 +67,16 @@ class Settings(BaseSettings):
     output_path: str = "data/output"
     temp_path: str = "data/temp"
     cache_path: str = "cache"
-    
+
     # 云存储配置
     storage_type: str = "local"  # local, aliyun_oss, aws_s3, tencent_cos, qiniu
-    
+
     # 阿里云OSS配置
     aliyun_access_key: str = ""
     aliyun_secret_key: str = ""
     aliyun_oss_bucket: str = ""
     aliyun_oss_endpoint: str = ""
     aliyun_oss_region: str = "oss-cn-hangzhou"
-
-    # 安全配置
-    jwt_secret: str = "your-secret-key-change-in-production"
-    jwt_algorithm: str = "HS256"
-    jwt_expire_minutes: int = 30
 
     # CORS配置
     cors_origins: List[str] = ["http://localhost:3000", "http://localhost:3001"]
@@ -108,107 +104,119 @@ class Settings(BaseSettings):
     metrics_enabled: bool = True
     health_check_enabled: bool = True
 
-    @validator("cors_origins", pre=True)
-    def parse_cors_origins(cls, v):
-        """解析CORS源列表"""
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: Any) -> List[str]:
+        """解析CORS源列表：支持 JSON 数组、逗号分隔字符串"""
+        if v is None:
+            return ["http://localhost:3000"]
+        if isinstance(v, list):
+            return v
         if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",")]
+            text = v.strip()
+            if not text:
+                return ["http://localhost:3000"]
+            if text.startswith("["):
+                try:
+                    parsed = json.loads(text)
+                    if isinstance(parsed, list):
+                        return [str(origin).strip() for origin in parsed]
+                except json.JSONDecodeError:
+                    pass
+            return [origin.strip() for origin in text.split(",") if origin.strip()]
         return v
 
-    @validator("openai_api_key")
-    def validate_openai_key(cls, v):
-        """验证OpenAI API密钥"""
+    @field_validator("openai_api_key")
+    @classmethod
+    def validate_openai_key(cls, v: str) -> str:
         if v and v == "your_openai_api_key_here":
-            return ""  # 重置为空，使用模板模式
+            return ""
         return v
 
-    @validator("unsplash_access_key")
-    def validate_unsplash_key(cls, v):
-        """验证Unsplash API密钥"""
+    @field_validator("unsplash_access_key")
+    @classmethod
+    def validate_unsplash_key(cls, v: str) -> str:
         if v and v == "your_unsplash_key_here":
-            return ""  # 重置为空，使用模板模式
+            return ""
         return v
 
-    @validator("jwt_secret")
-    def validate_jwt_secret(cls, v, values):
-        """验证JWT密钥"""
-        environment = values.get("environment", "development")
-        if v == "your-secret-key-change-in-production" and environment == "production":
-            raise ValueError("JWT secret must be changed in production")
-        return v
+    @model_validator(mode="after")
+    def validate_production_secret(self) -> "Settings":
+        if (
+            self.environment.lower() in {"production", "prod"}
+            and self.secret_key
+            in {
+                "your-secret-key-please-change-this-in-production",
+                "your-secret-key-change-in-production",
+                "your_secret_key_here",
+            }
+        ):
+            raise ValueError("SECRET_KEY must be changed in production")
+        return self
 
     @property
     def is_development(self) -> bool:
-        """是否为开发环境"""
         return self.environment.lower() in ["development", "dev"]
 
     @property
     def is_production(self) -> bool:
-        """是否为生产环境"""
         return self.environment.lower() in ["production", "prod"]
 
     @property
     def has_openai_key(self) -> bool:
-        """是否配置了OpenAI密钥"""
         return bool(self.openai_api_key and self.openai_api_key.strip())
 
     @property
     def has_unsplash_key(self) -> bool:
-        """是否配置了Unsplash密钥"""
         return bool(self.unsplash_access_key and self.unsplash_access_key.strip())
-    
+
     @property
     def has_aliyun_oss(self) -> bool:
-        """是否配置了阿里云OSS"""
         return bool(
-            self.aliyun_access_key and 
-            self.aliyun_secret_key and 
-            self.aliyun_oss_bucket and 
-            self.aliyun_oss_endpoint
+            self.aliyun_access_key
+            and self.aliyun_secret_key
+            and self.aliyun_oss_bucket
+            and self.aliyun_oss_endpoint
         )
-    
+
     @property
     def is_cloud_storage(self) -> bool:
-        """是否使用云存储"""
         return self.storage_type != "local"
 
     @property
     def has_redis(self) -> bool:
-        """是否配置了Redis"""
         return bool(self.redis_host)
 
     @property
     def get_redis_url(self) -> str:
-        """构建Redis URL"""
         password_part = f":{self.redis_password}@" if self.redis_password else ""
         return f"redis://{password_part}{self.redis_host}:{self.redis_port}/{self.redis_db}"
 
     @property
     def get_celery_broker(self) -> str:
-        """获取Celery broker URL"""
         return self.celery_broker_url or self.get_redis_url
 
     @property
     def get_celery_backend(self) -> str:
-        """获取Celery result backend URL"""
         return self.celery_result_backend or self.get_redis_url
-
-    def get_database_url(self) -> str:
-        """获取数据库URL"""
-        if self.database_url.startswith("sqlite"):
-            # 确保SQLite数据库目录存在
-            db_path = self.database_url.replace("sqlite:///", "")
-            os.makedirs(os.path.dirname(db_path), exist_ok=True)
-        return self.database_url
 
     def get_mysql_url(self) -> str:
         """构建MySQL连接URL"""
-        return f"mysql+pymysql://{self.mysql_user}:{self.mysql_password}@{self.mysql_host}:{self.mysql_port}/{self.mysql_database}?charset={self.mysql_charset}"
+        return (
+            f"mysql+pymysql://{self.mysql_user}:{self.mysql_password}"
+            f"@{self.mysql_host}:{self.mysql_port}/{self.mysql_database}"
+            f"?charset={self.mysql_charset}"
+        )
+
+    def get_database_url(self) -> str:
+        """获取数据库URL（始终返回 MySQL）"""
+        if self.database_url and self.database_url.startswith("mysql"):
+            return self.database_url
+        return self.get_mysql_url()
 
     @property
     def is_mysql(self) -> bool:
-        """是否使用MySQL数据库"""
-        return self.database_url.startswith("mysql")
+        return True
 
     def create_directories(self):
         """创建必要的目录"""
@@ -217,16 +225,18 @@ class Settings(BaseSettings):
             self.output_path,
             self.temp_path,
             self.cache_path,
-            os.path.dirname(self.log_file),
+            os.path.dirname(self.log_file) if self.log_file else "logs",
         ]
 
         for directory in directories:
-            os.makedirs(directory, exist_ok=True)
+            if directory:
+                os.makedirs(directory, exist_ok=True)
 
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = False
+        extra = "ignore"
 
 
 # 创建全局配置实例

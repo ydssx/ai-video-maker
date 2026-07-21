@@ -1,41 +1,21 @@
-# 测试文件说明
+# 测试说明
 
-这个目录包含了项目的各种测试和调试脚本。
+本目录以 **pytest** 为准。
 
-## 测试文件分类
+## 运行
 
-### 功能测试
-- `test_features.py` - 功能特性测试
-- `test_routes.py` - API路由测试
-- `test_user_data.py` - 用户数据测试
-- `test_download.py` - 下载功能测试
-- `test_text_image.py` - 文字图像测试
+```bash
+cd backend
+python3 -m pytest ../tests/ -v
+```
 
-### 调试工具
-- `debug_download.py` - 下载功能调试
-- `check_status.py` - 系统状态检查
-- `quick_test.py` - 快速测试脚本
+跳过需要 MySQL 的集成检查：
 
-### 修复工具
-- `fix_404.py` - 修复404错误
-- `fix_text_layer.py` - 修复文字图层问题
+```bash
+SKIP_MYSQL_TESTS=1 python3 -m pytest ../tests/ -v
+```
 
-### 构建测试
-- `test_build.py` - 构建测试
-- `test_imports.py` - 导入测试
-- `check_imports.js` - JavaScript导入检查
+## 当前用例
 
-### HTML测试页面
-- `test_download.html` - 下载功能测试页面
-
-## 使用方法
-
-1. 确保后端服务正在运行
-2. 根据需要运行相应的测试脚本
-3. 查看输出结果和日志
-
-## 注意事项
-
-- 运行测试前请确保环境配置正确
-- 某些测试可能需要特定的数据或文件
-- 如有问题请查看 TROUBLESHOOTING.md
+- `test_foundation.py` — 配置解析、数据库工厂、API 模型导入、健康检查
+- 其余历史脚本型文件已移除（导入路径过期、非 pytest 结构）

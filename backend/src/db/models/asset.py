@@ -7,8 +7,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from sqlalchemy import Column, DateTime, Enum as SQLEnum, ForeignKey, Integer, String, Text
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON, Column, DateTime, Enum as SQLEnum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from src.db.models.base import BaseModel
@@ -52,7 +51,7 @@ class Asset(BaseModel):
     status = Column(SQLEnum(AssetStatus), default=AssetStatus.UPLOADING, nullable=False)
     
     # 元数据
-    metadata_ = Column("metadata", JSONB, default=dict, nullable=False)
+    metadata_ = Column("metadata", JSON, default=dict, nullable=False)
     
     # 关系
     owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
