@@ -2,80 +2,19 @@
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#4f46e5" />
-    <meta name="description" content="AI 短视频制作平台 - 让创作更简单" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <title>AI 短视频制作平台</title>
-    
-    <!-- 预加载字体 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <style>
-      /* 加载动画 */
-      #loading {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        color: white;
-      }
-      
-      .loading-spinner {
-        width: 50px;
-        height: 50px;
-        border: 3px solid rgba(255,255,255,0.3);
-        border-top: 3px solid white;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin-bottom: 20px;
-      }
-      
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-      
-      .loading-text {
-        font-size: 18px;
-        font-weight: 500;
-      }
-      
-      /* 隐藏加载动画 */
-      .loaded #loading {
-        display: none;
-      }
-    </style>
+    <meta name="theme-color" content="#071422" />
+    <meta name="description" content="短镜 — AI 短视频制作平台" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>短镜 · AI 短视频</title>
   </head>
   <body>
-    <noscript>您需要启用 JavaScript 来运行此应用程序。</noscript>
-    
-    <!-- 加载动画 -->
-    <div id="loading">
-      <div class="loading-spinner"></div>
-      <div class="loading-text">AI 短视频制作平台加载中...</div>
-    </div>
-    
-    <!-- React 应用挂载点 -->
+    <noscript>需要启用 JavaScript</noscript>
     <div id="root"></div>
-    
-    <script>
-      // 应用加载完成后隐藏加载动画
-      window.addEventListener('load', function() {
-        setTimeout(function() {
-          document.body.classList.add('loaded');
-        }, 500);
-      });
-    </script>
   </body>
 </html>

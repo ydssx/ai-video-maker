@@ -1,22 +1,17 @@
 {
   "name": "ai-video-maker-frontend",
-  "version": "1.0.0",
-  "description": "AI 短视频制作平台前端",
+  "version": "2.0.0",
   "private": true,
   "dependencies": {
-    "@ant-design/charts": "^2.6.2",
-    "@ant-design/plots": "^2.6.3",
-    "@antv/g2": "^5.3.5",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "antd": "^5.12.8",
-    "axios": "^1.6.2",
-    "dayjs": "^1.11.10",
-    "moment": "^2.30.1",
+    "antd": "^5.22.3",
+    "axios": "^1.7.9",
+    "dayjs": "^1.11.13",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^7.8.1",
+    "react-router-dom": "^6.28.0",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
@@ -33,22 +28,11 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "extends": ["react-app", "react-app/jest"]
   },
   "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "production": [">0.2%", "not dead", "not op_mini all"],
+    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
   },
   "proxy": "http://localhost:8000"
 }
